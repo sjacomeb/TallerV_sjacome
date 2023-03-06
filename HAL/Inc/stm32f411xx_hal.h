@@ -95,7 +95,7 @@
 #define I2C_WRITE              0
 #define I2C_READ               1
 
-/* +++INICIO de la descripción de los elementos del periférico+++ */
+/* +++ INICIO de la descripción de los elementos del periférico +++ */
 
 /*Definición de la estrcutura de datos que representa a cada uno de los registros del periférico RCC.
  *
@@ -109,8 +109,8 @@ typedef struct
 	volatile uint32_t PLLCFGR;       //PLL Configuration Register              ADDR_OFFSET:  0x04
 	volatile uint32_t CFGR;         //Clock Control Register                   ADDR_OFFSET:  0x08
 	volatile uint32_t CIR;          //Clock Interrupt Register                 ADDR_OFFSET:  0x0C
-	volatile uint32_t AHB1RSTR;     //AHB1 Pheripheral Reset Register          ADDR_OFFSET:  0x10
-	volatile uint32_t AHB2RSTR;     //AHB2 Pheripheral Reset Register          ADDR_OFFSET:  0x14
+	volatile uint32_t AHB1RSTR;     //AHB1 Peripheral Reset Register           ADDR_OFFSET:  0x10
+	volatile uint32_t AHB2RSTR;     //AHB2 Peripheral Reset Register           ADDR_OFFSET:  0x14
 	volatile uint32_t reserved0;    //reserved                                 ADDR_OFFSET:  0x18
 	volatile uint32_t reserved1;    //reserved                                 ADDR_OFFSET:  0x1C
 	volatile uint32_t APB1RSTR;     //APB1 Peripheral Reset Register           ADDR_OFFSET:  0x20
@@ -144,16 +144,132 @@ typedef struct
 
 } RCC_RegDef_t;
 
+/*Hacemos un puntero a RCC_RegDef_t que apunta a la posición exacta del periférico RCC , de
+ * forma que cada miembro de la estructura coincide con cada uno de los SFR en la memoria
+ * MCU. Esta acción la estamos haciendo en un MACRO, de forma que el nuevo elemento "RCC" queda
+ * disponible para cada clase que incluya este archivo (.c)
+ */
 
+#define RCC         ((RCC_RegDef_t*)RCC_BASE_ADDR)
 
+/*Descripción bit a bit de cada uno de los registros que componen al periférico RCC
+ *
+ */
 
+#define RCC_AHB1ENR_GPIOA_EN            0
+#define RCC_AHB1ENR_GPIOB_EN            1
+#define RCC_AHB1ENR_GPIOC_EN            2
+#define RCC_AHB1ENR_GPIOD_EN            3
+#define RCC_AHB1ENR_GPIOE_EN            4
+#define RCC_AHB1ENR_GPIOH_EN            7
+#define RCC_AHB1ENR_CRCEN               12
+#define RCC_AHB1ENR_DMA1_EN             21
+#define RCC_AHB1ENR_DMA2_EN             22
 
+/* ======= FIN de la descripción de los elementos que componen el periférico RCC ======== */
 
+/* +++++ INICIO de la descripción de los elementos que componen el periférico GPIOx ++++++ */
+/* Definicón de la estructura de datos que representa a cada uno de los registros que componen el
+ * periférico GPIOx.
+ */
 
+typedef struct
+{
+	volatile uint32_t MODER;          //Port Mode Register                    ADDR_OFFSET: 0x00
+	volatile uint32_t OTYPER;         //Port Output Type Register             ADDR_OFFSET: 0x04
+	volatile uint32_t OSPEEDR;        //Port Output Speed Register            ADDR_OFFSET: 0x08
+	volatile uint32_t PUPDR;          //Port pull-up/pull-down Register       ADDR_OFFSET: 0x0C
+	volatile uint32_t IDR;            //Port Input Data Register              ADDR_OFFSET: 0x10
+	volatile uint32_t ODR;            //Port Output Data Register             ADDR_OFFSET: 0x14
+	volatile uint32_t BSRR;           //Port Bit set/reset Register           ADDR_OFFSET: 0x18
+	volatile uint32_t LCKR;           //Port Configuration Lock Register      ADDR_OFFSET: 0x1C
+	volatile uint32_t AFRL;           //Alternate Function Low Register       ADDR_OFFSET: 0x20
+	volatile uint32_t AFRM;           //Alternate Function High Register      ADDR_OFFSET: 0x24
+} GPIOx_RegDef_t;
 
+/*Al igual que con el RCC, creamos un  puntero a la estructura que define a GPIOx y debemos hacer que cada
+ * GPIOx (A, B, C...) quede ubicado exactamente sobre la posición de memoria correcta.
+ *
+ * NOTA: Tener cuidado que cada elemento coincida con la respectiva dirección base.
+ */
 
+#define GPIOA                 ((GPIOx_RegDef_t *)GPIOA_BASE_ADDR)
+#define GPIOB                 ((GPIOx_RegDef_t *)GPIOB_BASE_ADDR)
+#define GPIOC                 ((GPIOx_RegDef_t *)GPIOC_BASE_ADDR)
+#define GPIOD                 ((GPIOx_RegDef_t *)GPIOD_BASE_ADDR)
+#define GPIOE                 ((GPIOx_RegDef_t *)GPIOE_BASE_ADDR)
+#define GPIOH                 ((GPIOx_RegDef_t *)GPIOH_BASE_ADDR)
 
+/*Valores estándar para las configuraciones */
 
+/* 8.4.1 GPIOx_MODER (dos bit por cada PIN) */
+#define GPIO_MODE_IN           0
+#define GPIO_MODE_OUT          1
+#define GPIO_MODE_ALTFN        2
+#define GPIO_MODE_ANALOG       3
 
+/* 8.4.2 GPIOx_OTYPER (un bit por PIN) */
+#define GPIO_OTYPE_PUSHPULL     0
+#define GPIO_OTYPE_OPENDRAIN    1
 
+/*8.4.3 GPIOx_OSPEEDR (dos bit por cada PIN) */
+#define GPIO_OSPEED_LOW         0
+#define GPIO_OSPEED_MEDIUM      1
+#define GPIO_OSPEED_FAST        2
+#define GPIO_OSPEED_HIGH        3
+
+/* 8.4.4 GPIOx_PUPDR (dos bit por cada PIN) */
+#define GPIO_PUPDR_NOTHING        0
+#define GPIO_PUPDR_PULLUP         1
+#define GPIO_PUPDR_PULLDOWN       2
+#define GPIO_PUPDR_RESERVED       3
+
+/* 8.4.5 GPIOx_IDR (un bit por PIN) - este es el registro para leer el estado de un PIN */
+
+/* 8.4.6 GPIOx_ODR (un bit por PIN) -  este es el registro para escribir el estado de un PIN (1 o 0).
+ * Este registro puede ser escrito y leído desde el software, pero no garantiza una estructura
+ * "atómica", por lo cual es preferible utilizar el registro BSSR*/
+
+/* Definición de los nombres de los pines */
+#define PIN_0           0
+#define PIN_1           1
+#define PIN_2           2
+#define PIN_3           3
+#define PIN_4           4
+#define PIN_5           5
+#define PIN_6           6
+#define PIN_7           7
+#define PIN_8           8
+#define PIN_9           9
+#define PIN_10          10
+#define PIN_11          11
+#define PIN_12          12
+#define PIN_13          13
+#define PIN_14          14
+#define PIN_15          15
+
+/* Definición de las funciones alternativas */
+#define AF0           0b0000
+#define AF1           0b0001
+#define AF2           0b0010
+#define AF3           0b0011
+#define AF4           0b0100
+#define AF5           0b0101
+#define AF6           0b0110
+#define AF7           0b0111
+#define AF8           0b1000
+#define AF9           0b1001
+#define AF10          0b1010
+#define AF11          0b1011
+#define AF12          0b1100
+#define AF13          0b1101
+#define AF14          0b1110
+#define AF15          0b1111
+
+/*
+typedef struct
+{
+    volatile uint32_t dummy;       // Dummy Example Register               ADDR_OFFSET:  0x00
+}   DUMMY_RegDef_t;
+ */
 #endif /* STM32F411XX_HAL_H_ */
