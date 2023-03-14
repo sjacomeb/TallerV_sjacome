@@ -59,8 +59,8 @@ all: main-build
 main-build: Taller_semana3.elf secondary-outputs
 
 # Tool invocations
-Taller_semana3.elf Taller_semana3.map: $(OBJS) $(USER_OBJS) /home/sjacome/Documents/GitHub/sjacome_ProyectosTallerV/Taller_semana3/STM32F411RETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "Taller_semana3.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"/home/sjacome/Documents/GitHub/sjacome_ProyectosTallerV/Taller_semana3/STM32F411RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Taller_semana3.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+Taller_semana3.elf Taller_semana3.map: $(OBJS) $(USER_OBJS) /home/sjacome/Documents/GitHub/TallerV_sjacome/Talleres/Taller_semana3/STM32F411RETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "Taller_semana3.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"/home/sjacome/Documents/GitHub/TallerV_sjacome/Talleres/Taller_semana3/STM32F411RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Taller_semana3.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
