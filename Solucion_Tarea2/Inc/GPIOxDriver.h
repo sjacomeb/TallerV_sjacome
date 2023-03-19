@@ -90,8 +90,7 @@ typedef struct
 
 /* Esta estructura contiene dos elementos:
  * 1) La dirección del puerto (la referencia al puerto)
- * 2) La configuración específica del PIN que se está utilizando
- */
+ * 2) La configuración específica del PIN que se está utilizando */
 
 typedef struct
 {
@@ -104,5 +103,6 @@ typedef struct
 void GPIO_Config (GPIO_Handler_t *pGPIOHandler);
 void GPIO_WritePin (GPIO_Handler_t *pPinHandler, uint8_t newState);
 uint32_t GPIO_ReadPin (GPIO_Handler_t *pPinHandler);
+void GPIOxTooglePin(GPIO_Handler_t *pPinHandler);
 
 #endif /* GPIOXDRIVER_H_ */

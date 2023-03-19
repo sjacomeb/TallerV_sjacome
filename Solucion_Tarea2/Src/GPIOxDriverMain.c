@@ -26,22 +26,6 @@
 /* +++++++++ Segundo punto +++++++++++ */
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /* Función principal del programa */
 int main (void){
 
@@ -64,12 +48,17 @@ int main (void){
 	GPIO_WritePin(&handlerUserLedPin, SET);
 
 
+	/* +++++++++ Tercer punto +++++++++ */
+
+
 	//Este es el ciclo principal, donde se ejecuta todo el programa
 	while(1){
 
-		//Leemos el pin
-			GPIO_ReadPin(&handlerUserLedPin);
+		GPIO_ReadPin(&handlerUserLedPin);   //Lectura del valor del PIN5
+		GPIOxTooglePin(&handlerUserLedPin);  //Cambio de estado del LED2
 
 		__NOP();
 	}
 }
+
+
