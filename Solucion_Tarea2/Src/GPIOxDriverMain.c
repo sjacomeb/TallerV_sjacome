@@ -26,6 +26,11 @@
 /* +++++++++ Segundo punto +++++++++++ */
 
 
+
+
+
+
+
 /* Función principal del programa */
 int main (void){
 
@@ -47,9 +52,99 @@ int main (void){
 	//Hacemos que el PIN_A5 quede encendido
 	GPIO_WritePin(&handlerUserLedPin, SET);
 
+	/* ++++++++++++++++ Tercer punto +++++++++++++++++++ */
+	/* Hay que hacer la configuración de cada pin */
 
-	/* +++++++++ Tercer punto +++++++++ */
+	//PC9
+	//Definimos el handler para el PIN que deseamos configurar
+		GPIO_Handler_t handlerPC9 = {0};
 
+			//Deseamos trabajar con el puerto GPIOC
+			handlerPC9.pGPIOx = GPIOC;
+			handlerPC9.GPIO_PinConfig.GPIO_PinNumber       = PIN_9;
+			handlerPC9.GPIO_PinConfig.GPIO_PinMode         = GPIO_MODE_OUT;
+			handlerPC9.GPIO_PinConfig.GPIO_PinOType        = GPIO_OTYPE_PUSHPULL;
+			handlerPC9.GPIO_PinConfig.GPIO_PinPuPdControl  = GPIO_PUPDR_NOTHING;
+			handlerPC9.GPIO_PinConfig.GPIO_PinSpeed        = GPIO_OSPEED_MEDIUM;
+			handlerPC9.GPIO_PinConfig.GPIO_PinAltFunMode   = AF0;        //Ninguna Función
+
+	//PC6
+	//Definimos el handler para el PIN que deseamos configurar
+		GPIO_Handler_t handlerPC6 = {0};
+
+			//Deseamos trabajar con el puerto GPIOC
+			handlerPC6.pGPIOx = GPIOC;
+			handlerPC6.GPIO_PinConfig.GPIO_PinNumber       = PIN_6;
+			handlerPC6.GPIO_PinConfig.GPIO_PinMode         = GPIO_MODE_OUT;
+			handlerPC6.GPIO_PinConfig.GPIO_PinOType        = GPIO_OTYPE_PUSHPULL;
+			handlerPC6.GPIO_PinConfig.GPIO_PinPuPdControl  = GPIO_PUPDR_NOTHING;
+			handlerPC6.GPIO_PinConfig.GPIO_PinSpeed        = GPIO_OSPEED_MEDIUM;
+			handlerPC6.GPIO_PinConfig.GPIO_PinAltFunMode   = AF0;        //Ninguna Función
+
+	//PB8
+	//Definimos el handler para el PIN que deseamos configurar
+		GPIO_Handler_t handlerPB8 = {0};
+
+			//Deseamos trabajar con el puerto GPIOB
+			handlerPB8.pGPIOx = GPIOB;
+			handlerPB8.GPIO_PinConfig.GPIO_PinNumber       = PIN_8;
+			handlerPB8.GPIO_PinConfig.GPIO_PinMode         = GPIO_MODE_OUT;
+			handlerPB8.GPIO_PinConfig.GPIO_PinOType        = GPIO_OTYPE_PUSHPULL;
+			handlerPB8.GPIO_PinConfig.GPIO_PinPuPdControl  = GPIO_PUPDR_NOTHING;
+			handlerPB8.GPIO_PinConfig.GPIO_PinSpeed        = GPIO_OSPEED_MEDIUM;
+			handlerPB8.GPIO_PinConfig.GPIO_PinAltFunMode   = AF0;        //Ninguna Función
+
+	//PA6
+	//Definimos el handler para el PIN que deseamos configurar
+		GPIO_Handler_t handlerPA6 = {0};
+
+			//Deseamos trabajar con el puerto GPIOA
+			handlerPA6.pGPIOx = GPIOA;
+			handlerPA6.GPIO_PinConfig.GPIO_PinNumber       = PIN_6;
+			handlerPA6.GPIO_PinConfig.GPIO_PinMode         = GPIO_MODE_OUT;
+			handlerPA6.GPIO_PinConfig.GPIO_PinOType        = GPIO_OTYPE_PUSHPULL;
+			handlerPA6.GPIO_PinConfig.GPIO_PinPuPdControl  = GPIO_PUPDR_NOTHING;
+			handlerPA6.GPIO_PinConfig.GPIO_PinSpeed        = GPIO_OSPEED_MEDIUM;
+			handlerPA6.GPIO_PinConfig.GPIO_PinAltFunMode   = AF0;        //Ninguna Función
+
+	//PC7
+	//Definimos el handler para el PIN que deseamos configurar
+		GPIO_Handler_t handlerPC7 = {0};
+
+			//Deseamos trabajar con el puerto GPIOC
+			handlerPC7.pGPIOx = GPIOC;
+			handlerPC7.GPIO_PinConfig.GPIO_PinNumber       = PIN_7;
+			handlerPC7.GPIO_PinConfig.GPIO_PinMode         = GPIO_MODE_OUT;
+			handlerPC7.GPIO_PinConfig.GPIO_PinOType        = GPIO_OTYPE_PUSHPULL;
+			handlerPC7.GPIO_PinConfig.GPIO_PinPuPdControl  = GPIO_PUPDR_NOTHING;
+			handlerPC7.GPIO_PinConfig.GPIO_PinSpeed        = GPIO_OSPEED_MEDIUM;
+			handlerPC7.GPIO_PinConfig.GPIO_PinAltFunMode   = AF0;        //Ninguna Función
+
+	//PC8
+	//Definimos el handler para el PIN que deseamos configurar
+		GPIO_Handler_t handlerPC8 = {0};
+
+			//Deseamos trabajar con el puerto GPIOC
+			handlerPC8.pGPIOx = GPIOC;
+			handlerPC8.GPIO_PinConfig.GPIO_PinNumber       = PIN_8;
+			handlerPC8.GPIO_PinConfig.GPIO_PinMode         = GPIO_MODE_OUT;
+			handlerPC8.GPIO_PinConfig.GPIO_PinOType        = GPIO_OTYPE_PUSHPULL;
+			handlerPC8.GPIO_PinConfig.GPIO_PinPuPdControl  = GPIO_PUPDR_NOTHING;
+			handlerPC8.GPIO_PinConfig.GPIO_PinSpeed        = GPIO_OSPEED_MEDIUM;
+			handlerPC8.GPIO_PinConfig.GPIO_PinAltFunMode   = AF0;        //Ninguna Función
+
+	//PA7
+	//Definimos el handler para el PIN que deseamos configurar
+		GPIO_Handler_t handlerPA7 = {0};
+
+			//Deseamos trabajar con el puerto GPIOA
+			handlerPA7.pGPIOx = GPIOA;
+			handlerPA7.GPIO_PinConfig.GPIO_PinNumber       = PIN_7;
+			handlerPA7.GPIO_PinConfig.GPIO_PinMode         = GPIO_MODE_OUT;
+			handlerPA7.GPIO_PinConfig.GPIO_PinOType        = GPIO_OTYPE_PUSHPULL;
+			handlerPA7.GPIO_PinConfig.GPIO_PinPuPdControl  = GPIO_PUPDR_NOTHING;
+			handlerPA7.GPIO_PinConfig.GPIO_PinSpeed        = GPIO_OSPEED_MEDIUM;
+			handlerPA7.GPIO_PinConfig.GPIO_PinAltFunMode   = AF0;        //Ninguna Función
 
 	//Este es el ciclo principal, donde se ejecuta todo el programa
 	while(1){
