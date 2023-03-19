@@ -30,7 +30,7 @@
 /* Función principal del programa */
 int main (void){
 
-	//Definimos el handler para el PIN que deseamos configurar
+//Definimos el handler para el PIN que deseamos configurar
 	GPIO_Handler_t handlerUserLedPin = {0};
 
 	//Deseamos trabajar con el puerto GPIOA
@@ -48,8 +48,13 @@ int main (void){
 	//Hacemos que el PIN_A5 quede encendido
 	GPIO_WritePin(&handlerUserLedPin, SET);
 
+
 	//Este es el ciclo principal, donde se ejecuta todo el programa
 	while(1){
+
+		//Leemos el pin
+			GPIO_ReadPin(&handlerUserLedPin);
+
 		NOP();
 	}
 }
