@@ -273,6 +273,10 @@ int main (void){
 	}
 }
 
+/* El sistema pasa de un ciclo a otro desde el último valor que se guardó en cada pinX, es decir si en el primer ciclo el contador
+ * llegó hasta 20, desde ese valor va a iniciar el otro ciclo (decrecer el valor) hasta que el botón se deje de presionar. Por ejemplo
+ * si decrece hasta el valor 3, desde ese valor va a volver a incrementar el sistema*/
+
 
 
 
