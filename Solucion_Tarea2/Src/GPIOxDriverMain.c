@@ -173,7 +173,7 @@ int main (void){
 
 			handlerUserButton.pGPIOx = GPIOC;
 			handlerUserButton.GPIO_PinConfig.GPIO_PinNumber       = PIN_13;
-			handlerUserButton.GPIO_PinConfig.GPIO_PinMode         = GPIO_MODE_IN;
+			handlerUserButton.GPIO_PinConfig.GPIO_PinMode         = GPIO_MODE_IN;   //Configuramos el botón entrada
 			handlerUserButton.GPIO_PinConfig.GPIO_PinOType        = GPIO_OTYPE_PUSHPULL;
 			handlerUserButton.GPIO_PinConfig.GPIO_PinPuPdControl  = GPIO_PUPDR_NOTHING;
 			handlerUserButton.GPIO_PinConfig.GPIO_PinSpeed        = GPIO_OSPEED_MEDIUM;
@@ -183,7 +183,7 @@ int main (void){
 				GPIO_Config(&handlerUserButton);
 
 	//Creamos un contador
-	uint8_t cont = 1;
+	uint8_t cont = 1;     //Se utiliza para establecer el estado de cada LED dentro del ciclo
 
 	//Inicializamos las variables que almacenan el estado del pinX
 
@@ -212,48 +212,49 @@ int main (void){
 
 		//Punto tres
 
-		if(GPIO_ReadPin(&handlerUserButton) == SET){
-			if(cont>60){
+		//Se lee el estado del botón para saber si el sistema debe incrementar o decrementar su valor
+
+		if(GPIO_ReadPin(&handlerUserButton) == SET){  //Si el botón no está presionado, el sistema se incrementa
+			if(cont>60){          //Si el contador es mayor a 60 se va a reiniciar a 1
 				cont=1;
 			}
 
-			valueP0 = ((cont>>0) & 0b1);
-			valueP1 = ((cont>>1) & 0b1);
-			valueP2 = ((cont>>2) & 0b1);
+			valueP0 = ((cont>>0) & 0b1);  //Aplicamos la máscara 0b1 con una operación AND para
+			valueP1 = ((cont>>1) & 0b1);  //extraer la posición del pin, como hicimos en el primer
+			valueP2 = ((cont>>2) & 0b1);  //punto.
 			valueP3 = ((cont>>3) & 0b1);
 			valueP4 = ((cont>>4) & 0b1);
 			valueP5 = ((cont>>5) & 0b1);
 			valueP6 = ((cont>>6) & 0b1);
 
-			GPIO_WritePin(&handlerLedPA7, valueP0);
-			GPIO_WritePin(&handlerLedPC8,valueP1);
-			GPIO_WritePin(&handlerLedPC7,valueP2);
+			GPIO_WritePin(&handlerLedPA7, valueP0);     //Se usa la función GPIO_WritePin porque esta permite cambiar el estado del pin entregado
+			GPIO_WritePin(&handlerLedPC8,valueP1);      //en el handler de cada pin, asignando el valor entregado en las variables que almacenan
+			GPIO_WritePin(&handlerLedPC7,valueP2);      //el estado del PinX, esto según el contador.
 			GPIO_WritePin(&handlerLedPA6, valueP3);
 			GPIO_WritePin(&handlerLedPB8, valueP4);
 			GPIO_WritePin(&handlerLedPC6,valueP5);
 			GPIO_WritePin(&handlerLedPC9,valueP6);
 
-			cont++;
+			cont++; //El contador aumenta en 1 cada vez, hasta que sea interrumpido por el botón.
 
-			for(uint32_t i=0; i<2; i++){
+			for(uint32_t i=0; i<1600000; i++){     //Delay de aproximadamente un segundo entre lectura
 						__NOP();
 					}
 
 		}else{
-			if(GPIO_ReadPin(&handlerUserButton) == RESET){
-				if(cont<1){
-
+			if(GPIO_ReadPin(&handlerUserButton) == RESET){  //Si el botón está presionado, el sistema se decrementa
+				if(cont<1){     //Si el contador llega a 1 se devuleve a 60
 					cont = 60;
 				}
-				valueP0 = ((cont>>0) & 0b1);
-				valueP1 = ((cont>>1) & 0b1);
+				valueP0 = ((cont>>0) & 0b1);      //Se aplica la misma operación de la máscara 0b1 en
+				valueP1 = ((cont>>1) & 0b1);      //este ciclo
 				valueP2 = ((cont>>2) & 0b1);
 				valueP3 = ((cont>>3) & 0b1);
 				valueP4 = ((cont>>4) & 0b1);
 				valueP5 = ((cont>>5) & 0b1);
 				valueP6 = ((cont>>6) & 0b1);
 
-				GPIO_WritePin(&handlerLedPA7, valueP0);
+				GPIO_WritePin(&handlerLedPA7, valueP0);     //Se aplica la función GPIO_WritePin para este ciclo
 				GPIO_WritePin(&handlerLedPC8,valueP1);
 				GPIO_WritePin(&handlerLedPC7,valueP2);
 				GPIO_WritePin(&handlerLedPA6, valueP3);
@@ -262,9 +263,10 @@ int main (void){
 				GPIO_WritePin(&handlerLedPC9,valueP6);
 
 
-				for(uint32_t i=0; i<=2; i++){
+				for(uint32_t i=0; i<=1600000; i++){
 							__NOP();
 						}
+				cont--;   //El contador decrece en 1 cada vez, hasta que el botón se deje de presionar
 
 			}
 		}
