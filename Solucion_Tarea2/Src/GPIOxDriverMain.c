@@ -32,10 +32,6 @@
  * Utilizamos la operación XOR porque este conserva el valor cuando se aplica con cero y cambia el valor cuando se aplica un uno.
  */
 
-
-
-
-
 /* Función principal del programa */
 int main (void){
 
@@ -172,22 +168,88 @@ int main (void){
 			//Cargamos a la configuración del PIN_A7
 				GPIO_Config(&handlerLedPA7);
 
+	//Configuración del User_Button
+		GPIO_Handler_t handlerUserButton = {0};
+
+			handlerUserButton.pGPIOx = GPIOC;
+			handlerUserButton.GPIO_PinConfig.GPIO_PinNumber       = PIN_13;
+			handlerUserButton.GPIO_PinConfig.GPIO_PinMode         = GPIO_MODE_IN;
+			handlerUserButton.GPIO_PinConfig.GPIO_PinOType        = GPIO_OTYPE_PUSHPULL;
+			handlerUserButton.GPIO_PinConfig.GPIO_PinPuPdControl  = GPIO_PUPDR_NOTHING;
+			handlerUserButton.GPIO_PinConfig.GPIO_PinSpeed        = GPIO_OSPEED_MEDIUM;
+			handlerUserButton.GPIO_PinConfig.GPIO_PinAltFunMode   = AF0;        //Ninguna Función
+
+			//Cargamos a la configuración del PIN_A6
+				GPIO_Config(&handlerUserButton);
+
+	//Creamos un contador
+	uint8_t cont = 1;
+
+	//Variables que almacenan el estado del pinX
+
+	uint8_t valueP0 = 0;
+	uint8_t valueP1  = 0;
+	uint8_t valueP2 = 0;
+	uint8_t valueP3 = 0;
+	uint8_t valueP4 = 0;
+	uint8_t valueP5 = 0;
+	uint8_t valueP6  = 0;
+	uint8_t valueButton = 0;
+
+
 	//Este es el ciclo principal, donde se ejecuta todo el programa
 	while(1){
 
-		GPIO_ReadPin(&handlerUserLedPin);   //Lectura del valor del PIN5
-		GPIOxTooglePin(&handlerUserLedPin);  //Cambio de estado del LED2
+//		GPIO_ReadPin(&handlerUserLedPin);       //Leemos el valor del PIN_A5
+//		GPIOxTooglePin(&handlerUserLedPin);     //Cambiamos el estado del LED2
 
-		//Ciclo para la representación de números binarios
+		//Probando el segundo punto con un delay
+		/* Delay para probar el estado del PIN_A5 cada cierto tiempo
+		 * for(int j=0; j<1200000; j++){
+		 *  } */
 
-		for(uint8_t i=0; i<=6; i++){
-			if (i==0){
-				GPIO_WritePin(&handlerLedPA7, SET);
-			}else{
-				GPIO_WritePin(&handlerLedPA7, RESET );
+		//Delay de 1 segundo, teniendo en cuenta la frecuencia de 16 MHz del microcontrolador
+		for(uint32_t i=0; i<=2; i++){
+					__NOP();
 			}
+		//Necesitamos que el contador cuente:
+		//De 1 hasta 60 , si este se pasa de 60 lo debe regresar a 1
+		//De 60 hasta 1 , si este se pasa de 1 lo debe regresar a 60
+
+		switch(cont){
+		case (0):
+			cont = 60;
+			break;
+		case (61):
+			cont = 1;
+			break;
+		default:
+			break;
 		}
-		__NOP();
+
+		//Utilizamos una máscara SET con una operación AND para extraer la posición deseada, como hicimos anteriormente
+
+		valueP0 = ((cont >> 0) & 0b1);
+		valueP1 = ((cont >> 1) & 0b1); //bit 1: Se corre una posición
+		valueP2  = ((cont >> 2)& 0b1); //bit 2: Se corre dos posiciones
+		valueP3  = ((cont >> 3)& 0b1); //bit 3: Se corre tres posiciones
+		valueP4  = ((cont >> 4)& 0b1); //bit 4: Se corre cuatro posiciones
+		valueP5  = ((cont >> 5)& 0b1); //bit 5: Se corre cinco posiciones
+		valueP6 = ((cont >> 6)& 0b1); //bit 6: Se corre seis posiciones
+
+		// A continuación se procede a modificicar los estados de los pines previamente definicdos
+		// y configurados
+
+		GPIO_WritePin(&handlerLedPA7, valueP0);
+		GPIO_WritePin(&handlerLedPC8, valueP1);
+		GPIO_WritePin(&handlerLedPC7, valueP2);
+		GPIO_WritePin(&handlerLedPA6, valueP3);
+		GPIO_WritePin(&handlerLedPB8, valueP4);
+		GPIO_WritePin(&handlerLedPC6, valueP5);
+		GPIO_WritePin(&handlerLedPC9, valueP6);
+
+		statusButton = GPIO_ReadPin(&handlerUserButton);
+
 	}
 }
 
