@@ -1,11 +1,11 @@
 /*
- * basctimer.c
+ * BasicTimer.c
  *
- *  Created on: Mar 25, 2023
+ *  Created on: Mar 23, 2023
  *      Author: sjacome
  */
 
-#include "basictimer.h"
+#include "BasicTimer.h"
 
 /* Variable que guarda la referencia del periférico que se esta utilizando*/
 TIM_TypeDef	*ptrTimerUsed;
@@ -72,8 +72,7 @@ void BasicTimer_Config(BasicTimer_Handler_t *ptrBTimerHandler){
 	}else{
 		/* 3a. Estamos en DOWN_Mode, el limite se carga en ARR (0) y se comienza en un valor alto
 		 * Trabaja contando en direccion descendente*/
-		ptrBTimerHandler->ptrTIMx->CR1 &= ~TIM_CR1_DIR;
-		ptrBTimerHandler->ptrTIMx->CR1 |= TIM_CR1_DIR;
+		ptrBTimerHandler->ptrTIMx->CR1 = TIM_CR1_DIR;
 
 		/* 3b. Configuramos el Auto-reload. Este es el "limite" hasta donde el CNT va a contar
 		 * En modo descendente, con numero positivos, cual es el minimi valor al que ARR puede llegar*/
@@ -89,13 +88,7 @@ void BasicTimer_Config(BasicTimer_Handler_t *ptrBTimerHandler){
 
 	/* 5. Activamos la interrupción debida al Timerx Utilizado
 	 * Modificar el registro encargado de activar la interrupcion generada por el TIMx*/
-	if(ptrBTimerHandler->TIMx_Config.TIMx_interruptEnable == 1){
-		ptrBTimerHandler->ptrTIMx->DIER |= TIM_DIER_UIE;
-	}
-	else {
-		ptrBTimerHandler->ptrTIMx->DIER &= ~TIM_DIER_UIE;
-	}
-
+	ptrBTimerHandler->ptrTIMx->DIER = TIM_DIER_UIE;
 
 	/* 6. Activamos el canal del sistema NVIC para que lea la interrupción*/
 	if(ptrBTimerHandler->ptrTIMx == TIM2){
