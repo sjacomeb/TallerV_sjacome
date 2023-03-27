@@ -491,41 +491,91 @@ void extInt_Config(EXTI_Config_t *extiConfig){
 	/* 4.0 Seleccionamos el tipo de flanco */
 	if(extiConfig->edgeType == EXTERNAL_INTERRUPT_FALLING_EDGE){
 		/* Falling Trigger selection register*/
-        /*Agregue su código acá*/
+		EXTI->FTSR = 0;
+        EXTI->FTSR |= (SET << extiConfig->pGPIOHandler->GPIO_PinConfig.GPIO_PinNumber);
 	}
 	else{
-        /*Agregue su código acá*/
+		EXTI->RTSR = 0;
+		EXTI->RTSR |= (SET << extiConfig->pGPIOHandler->GPIO_PinConfig.GPIO_PinNumber);
 	}
 
 	/* 5.0 Desactivo primero las interrupciones globales */
-    /*Agregue su código acá*/
+	__disable_irq();
 
 	/* 6.0 Activamos la interrupción del canal que estamos configurando */
 	// Interrupt Mask register
-	/*Agregue su código acá*/
+	EXTI->IMR = 0;
+	EXTI->IMR |= (SET << extiConfig->pGPIOHandler->GPIO_PinConfig.GPIO_PinNumber);
 
 	/* 6.1 Matriculamos la interrupción en el NVIC para el canal correspondiente,
 	 * donde el canal 0 corresponde al EXTI_0, canal 1 al EXTI_1, etc.
 	 *
 	 * NOTA: Observar que algunos canales EXTI comparten un mismo vector de interrupción
 	 * */
-	switch (extiConfig->pGPIOHandler->GPIO_PinConfig.GPIO_PinNumber) {
+	switch (extiConfig->pGPIOHandler->GPIO_PinConfig.GPIO_PinNumber){
 	case 0: {
 		__NVIC_EnableIRQ(EXTI0_IRQn);
 		break;
 	}
 
 	case 1: {
-		/*Agregue su código acá*/
+		__NVIC_EnableIRQ(EXTI1_IRQn);
 		break;
 	}
-    /* .....
-     * .....
-     * .....
-     * y así hasta el ultimo caso */
-
+	case 2: {
+		__NVIC_EnableIRQ(EXTI2_IRQn);
+		break;
+	}
+	case 3: {
+		__NVIC_EnableIRQ(EXTI3_IRQn);
+		break;
+	}
+	case 4: {
+		__NVIC_EnableIRQ(EXTI4_IRQn);
+		break;
+	}
+	case 5: {
+		__NVIC_EnableIRQ(EXTI9_5_IRQn);
+		break;
+	}
+	case 6: {
+		__NVIC_EnableIRQ(EXTI9_5_IRQn);
+		break;
+	}
+	case 7: {
+		__NVIC_EnableIRQ(EXTI9_5_IRQn);
+		break;
+	}
+	case 8: {
+		__NVIC_EnableIRQ(EXTI9_5_IRQn);
+		break;
+	}
+	case 9: {
+		__NVIC_EnableIRQ(EXTI9_5_IRQn);
+		break;
+	}
+	case 10: {
+		__NVIC_EnableIRQ(EXTI15_10_IRQn);
+		break;
+	}
+	case 11: {
+		__NVIC_EnableIRQ(EXTI15_10_IRQn);
+		break;
+	}
+	case 12: {
+		__NVIC_EnableIRQ(EXTI15_10_IRQn);
+		break;
+	}
+	case 13: {
+		__NVIC_EnableIRQ(EXTI15_10_IRQn);
+		break;
+	}
+	case 14: {
+		__NVIC_EnableIRQ(EXTI15_10_IRQn);
+		break;
+	}
 	case 15: {
-		/*Agregue su código acá*/
+		__NVIC_EnableIRQ(EXTI15_10_IRQn);
 		break;
 	}
 
@@ -536,7 +586,7 @@ void extInt_Config(EXTI_Config_t *extiConfig){
 	}
 
 	/* 7.0 Volvemos a activar las interrupciones globales */
-	/*Agregue su código acá*/
+	__enable_irq();
 }
 
 
