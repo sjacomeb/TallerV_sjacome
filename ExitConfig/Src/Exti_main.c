@@ -75,7 +75,7 @@ void init_Hardware(void){
 	EXTI->RTSR = 0;	//Valor conocido
 	EXTI->RTSR |= EXTI_RTSR_TR13; // Activar flanco subida para pin13
 
-	/* Config mmascara EXTI */
+	/* Config mascara EXTI */
 	EXTI->IMR = 0;
 	EXTI->IMR |= EXTI_IMR_IM13;
 
@@ -96,13 +96,13 @@ void callback_exti13(void){
 	counterExti13++;
 }
 
-// Definicion ISR para EXTI13
-void EXTI15_10_IRQHandler(void){
-	if(EXTI->PR & EXTI_PR_PR13){
-		EXTI->PR |= EXTI_PR_PR13; // Limpiar bandera de EXTI 13
-		callback_exti13();
-	}
-}
+//// Definicion ISR para EXTI13
+//void EXTI15_10_IRQHandler(void){
+//	if(EXTI->PR & EXTI_PR_PR13){
+//		EXTI->PR |= EXTI_PR_PR13; // Limpiar bandera de EXTI 13
+//		callback_exti13();
+//	}
+//}
 
 void BasicTimer2_Callback(void){
 	GPIOxTooglePin(&handlerLED2);
