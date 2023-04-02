@@ -8,7 +8,7 @@
 #ifndef INC_BASICTIMER_H_
 #define INC_BASICTIMER_H_
 
-#include "stm32f4xx.h"
+#include <stm32f4xx.h>
 
 #define BTIMER_MODE_UP		0
 #define BTIMER_MODE_DOWN	1
@@ -19,7 +19,6 @@
 
 #define BTIMER_INTERRUP_ENABLE    1
 #define BTIMER_INTERRUP_DISABLE   0
-
 
 
 /* Estructura que contiene la configuración mínima necesaria para el manejo del Timer.*/
@@ -39,7 +38,9 @@ typedef struct
 }BasicTimer_Handler_t;
 
 void BasicTimer_Config(BasicTimer_Handler_t *ptrBTimerHandler);
-void BasicTimerX_Callback(void); /* Esta función debe ser sobre-escrita en el main para que el sistema funcione*/
-
+void BasicTimer2_Callback(void); /* Esta función debe ser sobre-escrita en el main para que el sistema funcione*/
+void BasicTimer3_Callback(void);
+void BasicTimer4_Callback(void);
+void BasicTimer5_Callback(void);
 
 #endif /* INC_BASICTIMER_H_ */
