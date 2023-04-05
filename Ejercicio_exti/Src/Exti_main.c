@@ -10,17 +10,20 @@
 #include "GPIOxDriver.h"
 #include "BasicTimer.h"
 
+
 /* Definicion de los elementos */
 
 GPIO_Handler_t handlerLED2 = {0};
 GPIO_Handler_t handlerUserButton = {0};
 BasicTimer_Handler_t handlerBlinkyTimer = {0};
 
+
 uint32_t counterExti13 = 0;
+uint8_t j=0;
 
 /* Prototipos de funciones del main */
 void init_Hardware(void);
-void callback_exti13(void);
+void callback_extInt13(void);
 
 
 int main(void){
@@ -63,6 +66,7 @@ void init_Hardware(void){
 	handlerUserButton.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
 	GPIO_Config(&handlerUserButton);
 
+
 	/* Activar señal de reloj SYSCFG */
 	RCC->APB2ENR |= RCC_APB2ENR_SYSCFGEN;
 
@@ -75,7 +79,7 @@ void init_Hardware(void){
 	EXTI->RTSR = 0;	//Valor conocido
 	EXTI->RTSR |= EXTI_RTSR_TR13; // Activar flanco subida para pin13
 
-	/* Config mmascara EXTI */
+	/* Config mascara EXTI */
 	EXTI->IMR = 0;
 	EXTI->IMR |= EXTI_IMR_IM13;
 
@@ -90,19 +94,20 @@ void init_Hardware(void){
 	/* Activar interrupciones */
 	__enable_irq();
 
+
 } // Fin init hardware
 
-void callback_exti13(void){
-	counterExti13++;
+void callback_extInt13(void){
+	j++;
 }
 
-// Definicion ISR para EXTI13
-void EXTI15_10_IRQHandler(void){
-	if(EXTI->PR & EXTI_PR_PR13){
-		EXTI->PR |= EXTI_PR_PR13; // Limpiar bandera de EXTI 13
-		callback_exti13();
-	}
-}
+//// Definicion ISR para EXTI13
+//void EXTI15_10_IRQHandler(void){
+//	if(EXTI->PR & EXTI_PR_PR13){
+//		EXTI->PR |= EXTI_PR_PR13; // Limpiar bandera de EXTI 13
+//		callback_exti13();
+//	}
+//}
 
 void BasicTimer2_Callback(void){
 	GPIOxTooglePin(&handlerLED2);
