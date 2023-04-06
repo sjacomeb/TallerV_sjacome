@@ -55,19 +55,18 @@ uint8_t buttonEdge = 0;    //Bandera del botón
 /* Variables */
 uint8_t counter = 0;             //Contador del encoder
 uint8_t s = 0;                   //Probar el funcionamiento del encoder
-uint8_t estadotransistor1 = 0;
-uint8_t estadotransistor2 = 0;
+uint8_t t=0;
 
 /* Prototipos de funciones del main */
 void init_Hardware(void);
 void displayNumber(uint8_t number);
-void ShowNumber(void);
 void callback_extInt13(void);
 
 int main(void){
 
 	/* Inicializacion de elementos*/
 	init_Hardware();
+
 
 	while(1){
 
@@ -89,12 +88,21 @@ int main(void){
 			}
 			encoderEdge = 0;     //Bajar la bandera
 		}
-
+		if(counter>9){
+			displayNumber(counter%10);
+			GPIO_WritePin(&handlerTransistor1, SET);
+			GPIO_WritePin(&handlerTransistor2, RESET);
+		}else{
+			displayNumber((counter - (counter%10))/10);
+			GPIO_WritePin(&handlerTransistor2, SET);
+			GPIO_WritePin(&handlerTransistor1, RESET);
+		}
+//		t = GPIO_ReadPin(&handlerTransistor1);
+//		GPIO_WritePin(&handlerTransistor2, !t);
 	}
 
 	return 0;
 }
-
 
 /*Esta funcion es encargada de configurar los pines GPIO correspondiente a cada segmento en el display
  * para mostrar el número solicitado*/
@@ -217,19 +225,19 @@ void init_Hardware(void){
 	handlerLED2.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
 	GPIO_Config(&handlerLED2);
 
-//	/* Configuración del TIM2 para controlar el blinky */
-//	handlerBlinkyTimer.ptrTIMx = TIM2;
-//	handlerBlinkyTimer.TIMx_Config.TIMx_mode		= BTIMER_MODE_UP;
-//	handlerBlinkyTimer.TIMx_Config.TIMx_speed		= BTIMER_SPEED_1ms;
-//	handlerBlinkyTimer.TIMx_Config.TIMx_period		= 250;       // Interrupcion cada 250 ms
-//	handlerBlinkyTimer.TIMx_Config.TIMx_interruptEnable = BTIMER_INTERRUP_ENABLE;
-//	BasicTimer_Config(&handlerBlinkyTimer);
+	/* Configuración del TIM2 para controlar el blinky */
+	handlerBlinkyTimer.ptrTIMx = TIM2;
+	handlerBlinkyTimer.TIMx_Config.TIMx_mode		= BTIMER_MODE_UP;
+	handlerBlinkyTimer.TIMx_Config.TIMx_speed		= BTIMER_SPEED_1ms;
+	handlerBlinkyTimer.TIMx_Config.TIMx_period		= 250;       // Interrupcion cada 250 ms
+	handlerBlinkyTimer.TIMx_Config.TIMx_interruptEnable = BTIMER_INTERRUP_ENABLE;
+	BasicTimer_Config(&handlerBlinkyTimer);
 
 	/* Configuración del TIM5 que controla el Display */
 	handlerTimerDisplay.ptrTIMx 							= TIM5;
 	handlerTimerDisplay.TIMx_Config.TIMx_mode 				= BTIMER_MODE_UP;
 	handlerTimerDisplay.TIMx_Config.TIMx_speed 				= BTIMER_SPEED_1ms;
-	handlerTimerDisplay.TIMx_Config.TIMx_period 			= 10;                   //Periodo de 10ms
+	handlerTimerDisplay.TIMx_Config.TIMx_period 			= 250;                   //Periodo de 10ms
 	handlerTimerDisplay.TIMx_Config.TIMx_interruptEnable	= BTIMER_INTERRUP_ENABLE;
 	BasicTimer_Config(&handlerTimerDisplay);
 
@@ -351,11 +359,6 @@ void init_Hardware(void){
 	handlerTransistor2.GPIO_PinConfig.GPIO_PinAltFunMode					= AF0;
 	GPIO_Config(&handlerTransistor2);
 
-	//Se establecen los estados iniciales de los perifericos que sean necesarios.
-	GPIO_WritePin(&handlerTransistor1, SET);
-	GPIO_WritePin(&handlerTransistor2, RESET);
-	ShowNumber();
-
 	//Cargamos la configuración del EXTI
 
 	/* Interrupción del encoder */
@@ -376,12 +379,10 @@ void BasicTimer2_Callback(void){
 
 void BasicTimer5_Callback(void){
 	GPIOxTooglePin(&handlerTransistor1);
-	GPIOxTooglePin(&handlerTransistor2);
-	ShowNumber();
 }
 
 void callback_extInt13(void){
-	encoderEdge = 1;    //Subiendo la bandera
+	encoderEdge = 1;        //Subiendo la bandera
 	s++;
 }
 
