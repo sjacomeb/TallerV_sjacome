@@ -8,7 +8,10 @@
 #include "BasicTimer.h"
 
 /* Variable que guarda la referencia del periférico que se esta utilizando*/
-TIM_TypeDef	*ptrTimerUsed;
+TIM_TypeDef	*ptrTimer2Used = TIM2;
+TIM_TypeDef	*ptrTimer3Used = TIM3;
+TIM_TypeDef	*ptrTimer4Used = TIM4;
+TIM_TypeDef	*ptrTimer5Used = TIM5;
 
 /* Función en la que cargamos la configuración del Timer
  * Recordar que siempre se debe comenzar con activar la señal de reloj
@@ -30,9 +33,10 @@ TIM_TypeDef	*ptrTimerUsed;
  */
 void BasicTimer_Config(BasicTimer_Handler_t *ptrBTimerHandler){
 	// Guardamos una referencia al periferico que estamos utilizando...
-	ptrTimerUsed = ptrBTimerHandler->ptrTIMx;
-//	uint8_t auxVar = 0;
-//	uint8_t auxPos = 0;
+	ptrTimer2Used = ptrBTimerHandler->ptrTIMx;
+	ptrTimer3Used = ptrBTimerHandler->ptrTIMx;
+	ptrTimer4Used = ptrBTimerHandler->ptrTIMx;
+	ptrTimer5Used = ptrBTimerHandler->ptrTIMx;
 
 	/* 0. Desactivamos las interrupciones globales mientras configuramos el sistema.*/
 	__disable_irq();
@@ -113,7 +117,24 @@ __attribute__((weak)) void BasicTimer2_Callback(void){
 	   */
 	__NOP();
 }
-
+__attribute__((weak)) void BasicTimer3_Callback(void){
+	  /* NOTE : This function should not be modified, when the callback is needed,
+	            the BasicTimerX_Callback could be implemented in the main file
+	   */
+	__NOP();
+}
+__attribute__((weak)) void BasicTimer4_Callback(void){
+	  /* NOTE : This function should not be modified, when the callback is needed,
+	            the BasicTimerX_Callback could be implemented in the main file
+	   */
+	__NOP();
+}
+__attribute__((weak)) void BasicTimer5_Callback(void){
+	  /* NOTE : This function should not be modified, when the callback is needed,
+	            the BasicTimerX_Callback could be implemented in the main file
+	   */
+	__NOP();
+}
 
 /* Esta es la función a la que apunta el sistema en el vector de interrupciones.
  * Se debe utilizar usando exactamente el mismo nombre definido en el vector de interrupciones,
@@ -130,9 +151,24 @@ void TIM2_IRQHandler(void){
 
 void TIM3_IRQHandler(void){
 	/* Limpiamos la bandera que indica que la interrupción se ha generado */
-	ptrTimerUsed->SR &= ~TIM_SR_UIF;
+	TIM3->SR &= ~TIM_SR_UIF;
 
 	/* LLamamos a la función que se debe encargar de hacer algo con esta interrupción*/
-	//BasicTimer3_Callback();
+	BasicTimer3_Callback();
+}
+void TIM4_IRQHandler(void){
+	/* Limpiamos la bandera que indica que la interrupción se ha generado */
+	TIM4->SR &= ~TIM_SR_UIF;
+
+	/* LLamamos a la función que se debe encargar de hacer algo con esta interrupción*/
+	BasicTimer4_Callback();
+
+}
+void TIM5_IRQHandler(void){
+	/* Limpiamos la bandera que indica que la interrupción se ha generado */
+	TIM5->SR &= ~TIM_SR_UIF;
+
+	/* LLamamos a la función que se debe encargar de hacer algo con esta interrupción*/
+	BasicTimer5_Callback();
 
 }
