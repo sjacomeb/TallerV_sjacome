@@ -18,8 +18,7 @@ GPIO_Handler_t handlerUserButton = {0};
 BasicTimer_Handler_t handlerBlinkyTimer = {0};
 
 
-uint32_t counterExti13 = 0;
-uint8_t j=0;
+uint8_t k=0;
 
 /* Prototipos de funciones del main */
 void init_Hardware(void);
@@ -98,7 +97,7 @@ void init_Hardware(void){
 } // Fin init hardware
 
 void callback_extInt13(void){
-	j++;
+	k++;
 }
 
 //// Definicion ISR para EXTI13

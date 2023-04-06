@@ -16,7 +16,6 @@
  ******************************************************************************
  */
 
-
 #include <stdint.h>
 #include "stm32f4xx.h"
 #include "GPIOxDriver.h"
@@ -29,16 +28,6 @@ GPIO_Handler_t 	handlerLED2 				= {0};
 GPIO_Handler_t 	handlerButton 				= {0};
 GPIO_Handler_t 	handlerCLK 					= {0};
 GPIO_Handler_t 	handlerDT 					= {0};
-GPIO_Handler_t 	handlerBlinkyPin 			= {0};
-GPIO_Handler_t	handlerTransistor1			= {0};
-GPIO_Handler_t	handlerTransistor2			= {0};
-GPIO_Handler_t	handlerPinDisplay_a			= {0};
-GPIO_Handler_t	handlerPinDisplay_b			= {0};
-GPIO_Handler_t	handlerPinDisplay_c			= {0};
-GPIO_Handler_t	handlerPinDisplay_d			= {0};
-GPIO_Handler_t	handlerPinDisplay_e			= {0};
-GPIO_Handler_t	handlerPinDisplay_f			= {0};
-GPIO_Handler_t	handlerPinDisplay_g			= {0};
 
 
 /*Definición de los timers*/
@@ -58,7 +47,6 @@ uint8_t s = 0;            //Probar el funcionamiento del encoder
 
 /* Prototipos de funciones del main */
 void init_Hardware(void);
-void displayNumber(uint8_t number);
 void callback_extInt13(void);
 
 int main(void){
@@ -69,20 +57,20 @@ int main(void){
 	while(1){
 
 		if((encoderEdge ==1) && (GPIO_ReadPin(&handlerDT)==0)){
-//			if(counter <=0){
-//				counter = 0;
-//			}else{
+			if(counter <=0){
+				counter = 0;
+			}else{
 				counter--;
-//			}
+			}
 			encoderEdge = 0;
 		}
 		else if((encoderEdge == 1) && (GPIO_ReadPin(&handlerDT)==1)){
-//			if(counter>99){
-//				counter = 99;
-//			}
-//			else{
+			if(counter>99){
+				counter = 99;
+			}
+			else{
 				counter++;
-//			}
+			}
 			encoderEdge = 0;     //Bajar la bandera
 		}
 
@@ -220,7 +208,7 @@ void init_Hardware(void){
 
 	/* Configuración del CLK */
 	handlerCLK.pGPIOx = GPIOC;
-	handlerCLK.GPIO_PinConfig.GPIO_PinNumber 	      = PIN_14;
+	handlerCLK.GPIO_PinConfig.GPIO_PinNumber 	      = PIN_13;
 	handlerCLK.GPIO_PinConfig.GPIO_PinMode 	          = GPIO_MODE_IN;
 	handlerCLK.GPIO_PinConfig.GPIO_PinOType	          = GPIO_OTYPE_PUSHPULL;
 	handlerCLK.GPIO_PinConfig.GPIO_PinSpeed	          = GPIO_OSPEED_FAST;
@@ -228,8 +216,8 @@ void init_Hardware(void){
 	GPIO_Config(&handlerCLK);
 
 	/* Configuración del DT */
-	handlerDT.pGPIOx = GPIOC;
-	handlerDT.GPIO_PinConfig.GPIO_PinNumber 	      = PIN_13;
+	handlerDT.pGPIOx = GPIOB;
+	handlerDT.GPIO_PinConfig.GPIO_PinNumber 	      = PIN_8;
 	handlerDT.GPIO_PinConfig.GPIO_PinMode 	          = GPIO_MODE_IN;
 	handlerDT.GPIO_PinConfig.GPIO_PinOType	          = GPIO_OTYPE_PUSHPULL;
 	handlerDT.GPIO_PinConfig.GPIO_PinSpeed	          = GPIO_OSPEED_FAST;
@@ -363,4 +351,3 @@ void callback_extInt13(void){
 //	buttonEdge = 1;
 //	s++;
 //}
-
