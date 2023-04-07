@@ -57,10 +57,16 @@ uint8_t counter = 0;             //Contador del encoder
 uint8_t s = 0;                   //Probar el funcionamiento del encoder
 uint8_t t=0;
 
+/* Punteros*/
+uint8_t *pCounter = &counter;
+uint8_t *pEncoderEdge = &encoderEdge;
+
 /* Prototipos de funciones del main */
 void init_Hardware(void);
 void displayNumber(uint8_t number);
+void contadorEncoder(uint8_t *pCounter, uint8_t *pEncoderEdge);
 void callback_extInt13(void);
+void BasicTimer2_Callback(void);
 
 int main(void){
 
@@ -69,39 +75,70 @@ int main(void){
 
 
 	while(1){
+		GPIO_WritePin(&handlerTransistor1, RESET);
+		GPIO_WritePin(&handlerTransistor2, SET);
 
-		if((encoderEdge ==1) && (GPIO_ReadPin(&handlerDT)==0)){
-			if(counter <=0){
-				counter = 0;
-			}else{
-				counter--;
-			}
-			encoderEdge = 0;
+//		contadorEncoder(counter, encoderEdge);
+//		displayNumber(counter);
 
-		}
-		else if((encoderEdge == 1) && (GPIO_ReadPin(&handlerDT)==1)){
-			if(counter>99){
-				counter = 99;
-			}
-			else{
-				counter++;
-			}
-			encoderEdge = 0;     //Bajar la bandera
-		}
-		if(counter>9){
-			displayNumber(counter%10);
-			GPIO_WritePin(&handlerTransistor1, SET);
-			GPIO_WritePin(&handlerTransistor2, RESET);
-		}else{
-			displayNumber((counter - (counter%10))/10);
-			GPIO_WritePin(&handlerTransistor2, SET);
-			GPIO_WritePin(&handlerTransistor1, RESET);
-		}
+
+	    if((GPIO_ReadPin(&handlerDT) == 0) && (encoderEdge == 1)){
+	        if(counter <= 0){
+	        	counter = 0;
+	        } else {
+	            (counter)--;
+	        }
+	        encoderEdge = 0;
+	        displayNumber(counter);
+
+	    } else if((GPIO_ReadPin(&handlerDT) == 1) && (encoderEdge == 1)){
+	        if(counter > 9){
+	        	counter = 9;
+	        } else {
+	            (counter)++;
+	        }
+	        encoderEdge = 0;
+	        displayNumber(counter);
+	    }
+
+
+
+//		if(counter>9){
+//			displayNumber(counter%10);
+//			GPIO_WritePin(&handlerTransistor1, RESET); // Transistor encendido
+//			GPIO_WritePin(&handlerTransistor2, SET);   //Transistor apagado
+//		}else{
+//			displayNumber((counter - (counter%10))/10);
+//			GPIO_WritePin(&handlerTransistor2, RESET);
+//			GPIO_WritePin(&handlerTransistor1, SET);
+//		}
 //		t = GPIO_ReadPin(&handlerTransistor1);
 //		GPIO_WritePin(&handlerTransistor2, !t);
 	}
 
 	return 0;
+}
+
+/*Esta función que recibe la información del encoder y hace el conteo de 0 a 99 */
+
+void contadorEncoder(uint8_t *pCounter, uint8_t *pEncoderEdge){
+
+    if((GPIO_ReadPin(&handlerDT) == 0) && (*pEncoderEdge == 1)){
+        if(*pCounter <= 0){
+            *pCounter = 0;
+        } else {
+            (*pCounter)--;
+        }
+        *pEncoderEdge = 0;
+
+    } else if((GPIO_ReadPin(&handlerDT) == 1) && (*pEncoderEdge == 1)){
+        if(*pCounter > 9){
+            *pCounter = 9;
+        } else {
+            (*pCounter)++;
+        }
+        *pEncoderEdge = 0;
+    }
 }
 
 /*Esta funcion es encargada de configurar los pines GPIO correspondiente a cada segmento en el display
@@ -198,21 +235,22 @@ void displayNumber (uint8_t number){
 		GPIO_WritePin(&handlerPinDisplay_f, RESET);
 		GPIO_WritePin(&handlerPinDisplay_g, RESET);
 		break;
-	default:
+	default:{
 		break;
+	}
 	}
 }
 
 /*Esta función se encarga de mostrar las unidades y decenas en los display 7 segmentos respectivamente
  * según el valor de la variable counter*/
-void ShowNumber(void){
-	if(GPIO_ReadPin(&handlerTransistor2) == 0){
-		displayNumber(counter/10);
-	}
-	else {
-		displayNumber(counter%10);
-	}
-}
+//void ShowNumber(void){
+//	if(GPIO_ReadPin(&handlerTransistor2) == 0){
+//		displayNumber(counter/10);
+//	}
+//	else {
+//		displayNumber(counter%10);
+//	}
+//}
 
 void init_Hardware(void){
 
@@ -377,9 +415,9 @@ void BasicTimer2_Callback(void){
 	GPIOxTooglePin(&handlerLED2);
 }
 
-void BasicTimer5_Callback(void){
-	GPIOxTooglePin(&handlerTransistor1);
-}
+//void BasicTimer5_Callback(void){
+//	GPIOxTooglePin(&handlerTransistor1);
+//}
 
 void callback_extInt13(void){
 	encoderEdge = 1;        //Subiendo la bandera

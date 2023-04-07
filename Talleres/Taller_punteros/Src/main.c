@@ -30,10 +30,10 @@ int main(void){
 	uint8_t *pDato = &dato;
 
 	//Guardar el valor que esta en esa dirección de memoria
-	uint8_t valorDato = *pDato;
+//	uint8_t valorDato = *pDato;
 
 	//Casteo básico
-	uint16_t casteoDato = (uint16_t) dato;
+//	uint16_t casteoDato = (uint16_t) dato;
 
 	/* Lo que no se debe hacer */
 	//Crear un puntero en una dirección específica
@@ -48,7 +48,7 @@ int main(void){
 
 	//Guardar la dirección de memoria de un puntero
 	//Pasamos de un puntero a un número de 32 bits
-	uint32_t direccionDato = (uint32_t) pDato;
+//	uint32_t direccionDato = (uint32_t) pDato;
 
 	//Cambiar el valor almacenado en el puntero
 	*pDato = 200;
