@@ -43,8 +43,10 @@ uint8_t buttonEdge = 0;   //Bandera para interrupción del botón
 uint8_t l=0;              //Variable para probar funcionamiento del encoder
 uint8_t s=0;              //Variable para probar funcionamiento del botón
 uint8_t counter = 0;
+uint8_t t=0;
 
 void init_Hardware(void);
+void displayNumber (uint8_t number);
 void callback_extInt13(void);
 void callback_extInt7(void);
 void BasicTimer2_Callback(void);
@@ -59,7 +61,23 @@ int main(void){
 	while(1){
 
 
-
+		if((GPIO_ReadPin(&handlerDT) == 1) && (encoderEdge == 1)){
+	        if(counter > 99){
+	        	counter = 99;
+	        } else {
+			counter++;
+			encoderEdge = 0;
+	        }
+		}
+		else if((GPIO_ReadPin(&handlerDT) == 0) && (encoderEdge == 1)){
+	        if(counter <= 0){
+	        	counter = 0;
+	        } else {
+			counter--;
+			encoderEdge = 0;
+	        }
+		}
+		displayNumber(counter);
 	}
 
 	return 0;
@@ -68,7 +86,7 @@ int main(void){
 /*Esta función que recibe la información del encoder y hace el conteo de 0 a 99 */
 void contadorEncoder(uint8_t *pCounter, uint8_t *pEncoderEdge){
 
-	if((GPIO_ReadPin(&handlerCLK) == 0) && (*pEncoderEdge == 1)){
+	if((GPIO_ReadPin(&handlerDT) == 1) && (*pEncoderEdge == 1)){
 		if(*pCounter > 99){
 			*pCounter = 99;
 		} else {
@@ -76,7 +94,7 @@ void contadorEncoder(uint8_t *pCounter, uint8_t *pEncoderEdge){
 		*pEncoderEdge = 0;
 		}
 	}
-	else if((GPIO_ReadPin(&handlerCLK) == 1) && (*pEncoderEdge == 1)){
+	else if((GPIO_ReadPin(&handlerDT) == 0) && (*pEncoderEdge == 1)){
 		if(*pCounter <= 0){
 			*pCounter = 0;
 		} else {
@@ -185,6 +203,196 @@ void displayNumber (uint8_t number){
 	}
 }
 
+void culebrita(uint8_t variable){
+	switch (variable){
+
+	case 0: {
+		//Segmento a (unidades)
+		GPIO_WritePin(&handlerTransistor1, SET);
+		GPIO_WritePin(&handlerTransistor2, RESET);
+
+		GPIO_WritePin(&handlerPinDisplay_a, RESET);
+		GPIO_WritePin(&handlerPinDisplay_b, SET);
+		GPIO_WritePin(&handlerPinDisplay_c, SET);
+		GPIO_WritePin(&handlerPinDisplay_d, SET);
+		GPIO_WritePin(&handlerPinDisplay_e, SET);
+		GPIO_WritePin(&handlerPinDisplay_f, SET);
+		GPIO_WritePin(&handlerPinDisplay_g, SET);
+
+		break;
+	}
+	case 1: {
+		//Segmento a (decenas)
+		GPIO_WritePin(&handlerTransistor1, RESET);
+		GPIO_WritePin(&handlerTransistor2, SET);
+
+		GPIO_WritePin(&handlerPinDisplay_a, RESET);
+		GPIO_WritePin(&handlerPinDisplay_b, SET);
+		GPIO_WritePin(&handlerPinDisplay_c, SET);
+		GPIO_WritePin(&handlerPinDisplay_d, SET);
+		GPIO_WritePin(&handlerPinDisplay_e, SET);
+		GPIO_WritePin(&handlerPinDisplay_f, SET);
+		GPIO_WritePin(&handlerPinDisplay_g, SET);
+
+		break;
+	}
+	case 2:{
+		//Segmento f (decenas)
+		GPIO_WritePin(&handlerTransistor1, RESET);
+		GPIO_WritePin(&handlerTransistor2, SET);
+
+
+		GPIO_WritePin(&handlerPinDisplay_a, SET);
+		GPIO_WritePin(&handlerPinDisplay_b, SET);
+		GPIO_WritePin(&handlerPinDisplay_c, SET);
+		GPIO_WritePin(&handlerPinDisplay_d, SET);
+		GPIO_WritePin(&handlerPinDisplay_e, SET);
+		GPIO_WritePin(&handlerPinDisplay_f, RESET);
+		GPIO_WritePin(&handlerPinDisplay_g, SET);
+
+		break;
+	}
+	case 3:{
+		//Segmento e (decenas)
+		GPIO_WritePin(&handlerTransistor1, RESET);
+		GPIO_WritePin(&handlerTransistor2, SET);
+
+		GPIO_WritePin(&handlerPinDisplay_a, SET);
+		GPIO_WritePin(&handlerPinDisplay_b, SET);
+		GPIO_WritePin(&handlerPinDisplay_c, SET);
+		GPIO_WritePin(&handlerPinDisplay_d, SET);
+		GPIO_WritePin(&handlerPinDisplay_e, RESET);
+		GPIO_WritePin(&handlerPinDisplay_f, SET);
+		GPIO_WritePin(&handlerPinDisplay_g, SET);
+
+		break;
+	}
+	case 4:{
+		//Segmento d (decenas)
+		GPIO_WritePin(&handlerTransistor1, RESET);
+		GPIO_WritePin(&handlerTransistor2, SET);
+
+		GPIO_WritePin(&handlerPinDisplay_a, SET);
+		GPIO_WritePin(&handlerPinDisplay_b, SET);
+		GPIO_WritePin(&handlerPinDisplay_c, SET);
+		GPIO_WritePin(&handlerPinDisplay_d, RESET);
+		GPIO_WritePin(&handlerPinDisplay_e, SET);
+		GPIO_WritePin(&handlerPinDisplay_f, SET);
+		GPIO_WritePin(&handlerPinDisplay_g, SET);
+
+		break;
+	}
+	case 5:{
+		//Segmento e (unidades)
+		GPIO_WritePin(&handlerTransistor1, SET);
+		GPIO_WritePin(&handlerTransistor2, RESET);
+
+		GPIO_WritePin(&handlerPinDisplay_a, SET);
+		GPIO_WritePin(&handlerPinDisplay_b, SET);
+		GPIO_WritePin(&handlerPinDisplay_c, SET);
+		GPIO_WritePin(&handlerPinDisplay_d, SET);
+		GPIO_WritePin(&handlerPinDisplay_e, RESET);
+		GPIO_WritePin(&handlerPinDisplay_f, SET);
+		GPIO_WritePin(&handlerPinDisplay_g, SET);
+
+		break;
+	}
+	case 6:{
+		//Segmento f (unidades)
+		GPIO_WritePin(&handlerTransistor1, SET);
+		GPIO_WritePin(&handlerTransistor2, RESET);
+
+		GPIO_WritePin(&handlerPinDisplay_a, SET);
+		GPIO_WritePin(&handlerPinDisplay_b, SET);
+		GPIO_WritePin(&handlerPinDisplay_c, SET);
+		GPIO_WritePin(&handlerPinDisplay_d, SET);
+		GPIO_WritePin(&handlerPinDisplay_e, SET);
+		GPIO_WritePin(&handlerPinDisplay_f, RESET);
+		GPIO_WritePin(&handlerPinDisplay_g, SET);
+
+		break;
+	}
+	case 7: {
+		//Segmento b (decenas)
+		GPIO_WritePin(&handlerTransistor1, RESET);
+		GPIO_WritePin(&handlerTransistor2, SET);
+
+		GPIO_WritePin(&handlerPinDisplay_a, SET);
+		GPIO_WritePin(&handlerPinDisplay_b, RESET);
+		GPIO_WritePin(&handlerPinDisplay_c, SET);
+		GPIO_WritePin(&handlerPinDisplay_d, SET);
+		GPIO_WritePin(&handlerPinDisplay_e, SET);
+		GPIO_WritePin(&handlerPinDisplay_f, SET);
+		GPIO_WritePin(&handlerPinDisplay_g, SET);
+
+		break;
+	}
+	case 8: {
+		//Segmento c (decenas)
+		GPIO_WritePin(&handlerTransistor1, RESET);
+		GPIO_WritePin(&handlerTransistor2, SET);
+
+		GPIO_WritePin(&handlerPinDisplay_a, SET);
+		GPIO_WritePin(&handlerPinDisplay_b, SET);
+		GPIO_WritePin(&handlerPinDisplay_c, RESET);
+		GPIO_WritePin(&handlerPinDisplay_d, SET);
+		GPIO_WritePin(&handlerPinDisplay_e, SET);
+		GPIO_WritePin(&handlerPinDisplay_f, SET);
+		GPIO_WritePin(&handlerPinDisplay_g, SET);
+
+		break;
+	}
+	case 9:{
+		//Segmento d (unidades)
+		GPIO_WritePin(&handlerTransistor1,  SET);
+		GPIO_WritePin(&handlerTransistor2, RESET);
+
+		GPIO_WritePin(&handlerPinDisplay_a, SET);
+		GPIO_WritePin(&handlerPinDisplay_b, SET);
+		GPIO_WritePin(&handlerPinDisplay_c, SET);
+		GPIO_WritePin(&handlerPinDisplay_d, RESET);
+		GPIO_WritePin(&handlerPinDisplay_e, SET);
+		GPIO_WritePin(&handlerPinDisplay_f, SET);
+		GPIO_WritePin(&handlerPinDisplay_g, SET);
+
+		break;
+	}
+	case 10 :{
+		//Segmento c (unidades)
+		GPIO_WritePin(&handlerTransistor1,  SET);
+		GPIO_WritePin(&handlerTransistor2, RESET);
+
+		GPIO_WritePin(&handlerPinDisplay_a, SET);
+		GPIO_WritePin(&handlerPinDisplay_b, SET);
+		GPIO_WritePin(&handlerPinDisplay_c, RESET);
+		GPIO_WritePin(&handlerPinDisplay_d, SET);
+		GPIO_WritePin(&handlerPinDisplay_e, SET);
+		GPIO_WritePin(&handlerPinDisplay_f, SET);
+		GPIO_WritePin(&handlerPinDisplay_g, SET);
+
+		break;
+	}
+	case 11: {
+		//Segmento b (unidades)
+		GPIO_WritePin(&handlerTransistor1,  SET);
+		GPIO_WritePin(&handlerTransistor2, RESET);
+
+		GPIO_WritePin(&handlerPinDisplay_a, SET);
+		GPIO_WritePin(&handlerPinDisplay_b, RESET);
+		GPIO_WritePin(&handlerPinDisplay_c, SET);
+		GPIO_WritePin(&handlerPinDisplay_d, SET);
+		GPIO_WritePin(&handlerPinDisplay_e, SET);
+		GPIO_WritePin(&handlerPinDisplay_f, SET);
+		GPIO_WritePin(&handlerPinDisplay_g, SET);
+
+		break;
+	}
+	default :
+		break;
+
+	}
+}
+
 void init_Hardware(void){
 
 	/* Configuración del led de estado */
@@ -215,7 +423,7 @@ void init_Hardware(void){
 
 	/* Configuración del CLK LISTO */
 	handlerCLK.pGPIOx = GPIOC;
-	handlerCLK.GPIO_PinConfig.GPIO_PinNumber 	      = PIN_3;
+	handlerCLK.GPIO_PinConfig.GPIO_PinNumber 	      = PIN_13;
 	handlerCLK.GPIO_PinConfig.GPIO_PinMode 	          = GPIO_MODE_IN;
 	handlerCLK.GPIO_PinConfig.GPIO_PinOType	          = GPIO_OTYPE_PUSHPULL;
 	handlerCLK.GPIO_PinConfig.GPIO_PinSpeed	          = GPIO_OSPEED_FAST;
@@ -224,8 +432,8 @@ void init_Hardware(void){
 
 
 	/* Configuración del DT LISTO */
-	handlerDT.pGPIOx = GPIOC;
-	handlerDT.GPIO_PinConfig.GPIO_PinNumber 	      = PIN_13;
+	handlerDT.pGPIOx = GPIOB;
+	handlerDT.GPIO_PinConfig.GPIO_PinNumber 	      = PIN_8;
 	handlerDT.GPIO_PinConfig.GPIO_PinMode 	          = GPIO_MODE_IN;
 	handlerDT.GPIO_PinConfig.GPIO_PinOType	          = GPIO_OTYPE_PUSHPULL;
 	handlerDT.GPIO_PinConfig.GPIO_PinSpeed	          = GPIO_OSPEED_FAST;
@@ -335,7 +543,7 @@ void init_Hardware(void){
 	//Cargamos la configuración del EXTI
 
 	/* Interrupción del encoder */
-	ExtiClock.pGPIOHandler = &handlerDT;
+	ExtiClock.pGPIOHandler = &handlerCLK;
 	ExtiClock.edgeType = EXTERNAL_INTERRUPT_FALLING_EDGE;
 	extInt_Config(&ExtiClock);
 
@@ -359,8 +567,8 @@ void callback_extInt13(void){
 	l++;
 }
 
-void callback_extInt7(void){
-	buttonEdge = 1;
-	s++;
-}
+//void callback_extInt7(void){
+//	buttonEdge = 1;
+//	s++;
+//}
 
