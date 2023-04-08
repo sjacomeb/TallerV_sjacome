@@ -54,7 +54,7 @@ uint8_t buttonEdge = 0;    //Bandera del botón
 
 /* Variables */
 uint8_t counter = 0;             //Contador del encoder
-uint8_t s = 0;                   //Probar el funcionamiento del encoder
+uint8_t p = 0;                   //Probar el funcionamiento del encoder
 uint8_t t=0;
 
 /* Punteros*/
@@ -80,22 +80,22 @@ int main(void){
 
 
 	    if((GPIO_ReadPin(&handlerDT) == 0) && (encoderEdge == 1)){
-	        if(counter <= 0){
-	        	counter = 0;
-	        } else {
-	            (counter)--;
-	        }
+//	        if(counter <= 0){
+//	        	counter = 0;
+//	        } else {
+	            counter--;
+//	        }
 	        encoderEdge = 0;
-	        displayNumber(counter);
 
-	    } else if((GPIO_ReadPin(&handlerDT) == 3) && (encoderEdge == 1)){
-	        if(counter > 9){
-	        	counter = 9;
-	        } else {
-	            (counter)++;
-	        }
+
+	    } else if((GPIO_ReadPin(&handlerDT) == 1) && (encoderEdge == 1)){
+//	        if(counter > 9){
+//	        	counter = 9;
+//	        } else {
+	            counter++;
+//	        }
 	        encoderEdge = 0;
-	        displayNumber(counter);
+
 	    }
 
 
@@ -268,26 +268,26 @@ void init_Hardware(void){
 	handlerBlinkyTimer.TIMx_Config.TIMx_interruptEnable = BTIMER_INTERRUP_ENABLE;
 	BasicTimer_Config(&handlerBlinkyTimer);
 
-	/* Configuración del TIM5 que controla el Display */
-	handlerTimerDisplay.ptrTIMx 							= TIM5;
-	handlerTimerDisplay.TIMx_Config.TIMx_mode 				= BTIMER_MODE_UP;
-	handlerTimerDisplay.TIMx_Config.TIMx_speed 				= BTIMER_SPEED_1ms;
-	handlerTimerDisplay.TIMx_Config.TIMx_period 			= 250;                   //Periodo de 10ms
-	handlerTimerDisplay.TIMx_Config.TIMx_interruptEnable	= BTIMER_INTERRUP_ENABLE;
-	BasicTimer_Config(&handlerTimerDisplay);
+//	/* Configuración del TIM5 que controla el Display */
+//	handlerTimerDisplay.ptrTIMx 							= TIM5;
+//	handlerTimerDisplay.TIMx_Config.TIMx_mode 				= BTIMER_MODE_UP;
+//	handlerTimerDisplay.TIMx_Config.TIMx_speed 				= BTIMER_SPEED_1ms;
+//	handlerTimerDisplay.TIMx_Config.TIMx_period 			= 250;
+//	handlerTimerDisplay.TIMx_Config.TIMx_interruptEnable	= BTIMER_INTERRUP_ENABLE;
+//	BasicTimer_Config(&handlerTimerDisplay);
 
-	/* Configuración del CLK LISTO */
-	handlerCLK.pGPIOx = GPIOC;
-	handlerCLK.GPIO_PinConfig.GPIO_PinNumber 	      = PIN_13;
-	handlerCLK.GPIO_PinConfig.GPIO_PinMode 	          = GPIO_MODE_IN;
-	handlerCLK.GPIO_PinConfig.GPIO_PinOType	          = GPIO_OTYPE_PUSHPULL;
-	handlerCLK.GPIO_PinConfig.GPIO_PinSpeed	          = GPIO_OSPEED_FAST;
-	handlerCLK.GPIO_PinConfig.GPIO_PinPuPdControl     = GPIO_PUPDR_NOTHING;
-	GPIO_Config(&handlerCLK);
+//	/* Configuración del CLK LISTO */
+//	handlerCLK.pGPIOx = GPIOC;
+//	handlerCLK.GPIO_PinConfig.GPIO_PinNumber 	      = PIN_13;
+//	handlerCLK.GPIO_PinConfig.GPIO_PinMode 	          = GPIO_MODE_IN;
+//	handlerCLK.GPIO_PinConfig.GPIO_PinOType	          = GPIO_OTYPE_PUSHPULL;
+//	handlerCLK.GPIO_PinConfig.GPIO_PinSpeed	          = GPIO_OSPEED_FAST;
+//	handlerCLK.GPIO_PinConfig.GPIO_PinPuPdControl     = GPIO_PUPDR_NOTHING;
+//	GPIO_Config(&handlerCLK);
 
 	/* Configuración del DT LISTO */
-	handlerDT.pGPIOx = GPIOB;
-	handlerDT.GPIO_PinConfig.GPIO_PinNumber 	      = PIN_8;
+	handlerDT.pGPIOx = GPIOC;
+	handlerDT.GPIO_PinConfig.GPIO_PinNumber 	      = PIN_13;
 	handlerDT.GPIO_PinConfig.GPIO_PinMode 	          = GPIO_MODE_IN;
 	handlerDT.GPIO_PinConfig.GPIO_PinOType	          = GPIO_OTYPE_PUSHPULL;
 	handlerDT.GPIO_PinConfig.GPIO_PinSpeed	          = GPIO_OSPEED_FAST;
@@ -304,95 +304,95 @@ void init_Hardware(void){
 //	handlerButton.GPIO_PinConfig.GPIO_PinAltFunMode				= AF0;
 //	GPIO_Config(&handlerButton);
 //
-	/* Configuración del segmento "a" del display LISTO */
-	handlerPinDisplay_a.pGPIOx 												= GPIOA;
-	handlerPinDisplay_a.GPIO_PinConfig.GPIO_PinNumber			 			= PIN_0;
-	handlerPinDisplay_a.GPIO_PinConfig.GPIO_PinMode 						= GPIO_MODE_OUT;
-	handlerPinDisplay_a.GPIO_PinConfig.GPIO_PinOType 						= GPIO_OTYPE_PUSHPULL;
-	handlerPinDisplay_a.GPIO_PinConfig.GPIO_PinPuPdControl 					= GPIO_PUPDR_NOTHING;
-	handlerPinDisplay_a.GPIO_PinConfig.GPIO_PinSpeed 						= GPIO_OSPEED_MEDIUM;
-	handlerPinDisplay_a.GPIO_PinConfig.GPIO_PinAltFunMode					= AF0;
-	GPIO_Config(&handlerPinDisplay_a);
-
-	/* Configuración del  segmento "b" del display LISTO */
-	handlerPinDisplay_b.pGPIOx 												= GPIOB;
-	handlerPinDisplay_b.GPIO_PinConfig.GPIO_PinNumber			 			= PIN_7;
-	handlerPinDisplay_b.GPIO_PinConfig.GPIO_PinMode 						= GPIO_MODE_OUT;
-	handlerPinDisplay_b.GPIO_PinConfig.GPIO_PinOType 						= GPIO_OTYPE_PUSHPULL;
-	handlerPinDisplay_b.GPIO_PinConfig.GPIO_PinPuPdControl 					= GPIO_PUPDR_NOTHING;
-	handlerPinDisplay_b.GPIO_PinConfig.GPIO_PinSpeed 						= GPIO_OSPEED_MEDIUM;
-	handlerPinDisplay_b.GPIO_PinConfig.GPIO_PinAltFunMode					= AF0;
-	GPIO_Config(&handlerPinDisplay_b);
-
-	/* Configuración del segmento "c" del display LISTO */
-	handlerPinDisplay_c.pGPIOx 												= GPIOB;
-	handlerPinDisplay_c.GPIO_PinConfig.GPIO_PinNumber			 			= PIN_6;
-	handlerPinDisplay_c.GPIO_PinConfig.GPIO_PinMode 						= GPIO_MODE_OUT;
-	handlerPinDisplay_c.GPIO_PinConfig.GPIO_PinOType 						= GPIO_OTYPE_PUSHPULL;
-	handlerPinDisplay_c.GPIO_PinConfig.GPIO_PinPuPdControl 					= GPIO_PUPDR_NOTHING;
-	handlerPinDisplay_c.GPIO_PinConfig.GPIO_PinSpeed 						= GPIO_OSPEED_MEDIUM;
-	handlerPinDisplay_c.GPIO_PinConfig.GPIO_PinAltFunMode					= AF0;
-	GPIO_Config(&handlerPinDisplay_c);
-
-	/* Configuración del segmento "d" del display LISTO */
-	handlerPinDisplay_d.pGPIOx 												= GPIOB;
-	handlerPinDisplay_d.GPIO_PinConfig.GPIO_PinNumber			 			= PIN_0;
-	handlerPinDisplay_d.GPIO_PinConfig.GPIO_PinMode 						= GPIO_MODE_OUT;
-	handlerPinDisplay_d.GPIO_PinConfig.GPIO_PinOType 						= GPIO_OTYPE_PUSHPULL;
-	handlerPinDisplay_d.GPIO_PinConfig.GPIO_PinPuPdControl 					= GPIO_PUPDR_NOTHING;
-	handlerPinDisplay_d.GPIO_PinConfig.GPIO_PinSpeed 						= GPIO_OSPEED_FAST;
-	handlerPinDisplay_d.GPIO_PinConfig.GPIO_PinAltFunMode					= AF0;
-	GPIO_Config(&handlerPinDisplay_d);
-
-	/* Configuración del segmento "e" del display LISTO */
-	handlerPinDisplay_e.pGPIOx 												= GPIOC;
-	handlerPinDisplay_e.GPIO_PinConfig.GPIO_PinNumber			 			= PIN_9;
-	handlerPinDisplay_e.GPIO_PinConfig.GPIO_PinMode 						= GPIO_MODE_OUT;
-	handlerPinDisplay_e.GPIO_PinConfig.GPIO_PinOType 						= GPIO_OTYPE_PUSHPULL;
-	handlerPinDisplay_e.GPIO_PinConfig.GPIO_PinPuPdControl 					= GPIO_PUPDR_NOTHING;
-	handlerPinDisplay_e.GPIO_PinConfig.GPIO_PinSpeed 						= GPIO_OSPEED_MEDIUM;
-	handlerPinDisplay_e.GPIO_PinConfig.GPIO_PinAltFunMode					= AF0;
-	GPIO_Config(&handlerPinDisplay_e);
-
-	/* Configuración del segmento "f" del display LISTO */
-	handlerPinDisplay_f.pGPIOx 												= GPIOA;
-	handlerPinDisplay_f.GPIO_PinConfig.GPIO_PinNumber			 			= PIN_1;
-	handlerPinDisplay_f.GPIO_PinConfig.GPIO_PinMode 						= GPIO_MODE_OUT;
-	handlerPinDisplay_f.GPIO_PinConfig.GPIO_PinOType 						= GPIO_OTYPE_PUSHPULL;
-	handlerPinDisplay_f.GPIO_PinConfig.GPIO_PinPuPdControl 					= GPIO_PUPDR_NOTHING;
-	handlerPinDisplay_f.GPIO_PinConfig.GPIO_PinSpeed 						= GPIO_OSPEED_MEDIUM;
-	handlerPinDisplay_f.GPIO_PinConfig.GPIO_PinAltFunMode					= AF0;
-	GPIO_Config(&handlerPinDisplay_f);
-
-	/* Configuración del segmento "g" del display LISTO */
-	handlerPinDisplay_g.pGPIOx 												= GPIOC;
-	handlerPinDisplay_g.GPIO_PinConfig.GPIO_PinNumber			 			= PIN_8;
-	handlerPinDisplay_g.GPIO_PinConfig.GPIO_PinMode 						= GPIO_MODE_OUT;
-	handlerPinDisplay_g.GPIO_PinConfig.GPIO_PinOType 						= GPIO_OTYPE_PUSHPULL;
-	handlerPinDisplay_g.GPIO_PinConfig.GPIO_PinPuPdControl 					= GPIO_PUPDR_NOTHING;
-	handlerPinDisplay_g.GPIO_PinConfig.GPIO_PinSpeed 						= GPIO_OSPEED_MEDIUM;
-	handlerPinDisplay_g.GPIO_PinConfig.GPIO_PinAltFunMode					= AF0;
-	GPIO_Config(&handlerPinDisplay_g);
-
-	/* Configuración del transistor 1 */
-	handlerTransistor1.pGPIOx 												= GPIOC;
-	handlerTransistor1.GPIO_PinConfig.GPIO_PinNumber			 			= PIN_10;
-	handlerTransistor1.GPIO_PinConfig.GPIO_PinMode 							= GPIO_MODE_OUT;
-	handlerTransistor1.GPIO_PinConfig.GPIO_PinOType 						= GPIO_OTYPE_PUSHPULL;
-	handlerTransistor1.GPIO_PinConfig.GPIO_PinPuPdControl 					= GPIO_PUPDR_NOTHING;
-	handlerTransistor1.GPIO_PinConfig.GPIO_PinSpeed 						= GPIO_OSPEED_MEDIUM;
-	handlerTransistor1.GPIO_PinConfig.GPIO_PinAltFunMode					= AF0;
-	GPIO_Config(&handlerTransistor1);
-
-	/* Configuración del transistor 2 */
-	handlerTransistor2.pGPIOx 												= GPIOC;
-	handlerTransistor2.GPIO_PinConfig.GPIO_PinNumber			 			= PIN_12;
-	handlerTransistor2.GPIO_PinConfig.GPIO_PinMode 							= GPIO_MODE_OUT;
-	handlerTransistor2.GPIO_PinConfig.GPIO_PinOType 						= GPIO_OTYPE_PUSHPULL;
-	handlerTransistor2.GPIO_PinConfig.GPIO_PinPuPdControl 					= GPIO_PUPDR_NOTHING;
-	handlerTransistor2.GPIO_PinConfig.GPIO_PinSpeed 						= GPIO_OSPEED_MEDIUM;
-	handlerTransistor2.GPIO_PinConfig.GPIO_PinAltFunMode					= AF0;
-	GPIO_Config(&handlerTransistor2);
+//	/* Configuración del segmento "a" del display LISTO */
+//	handlerPinDisplay_a.pGPIOx 												= GPIOA;
+//	handlerPinDisplay_a.GPIO_PinConfig.GPIO_PinNumber			 			= PIN_0;
+//	handlerPinDisplay_a.GPIO_PinConfig.GPIO_PinMode 						= GPIO_MODE_OUT;
+//	handlerPinDisplay_a.GPIO_PinConfig.GPIO_PinOType 						= GPIO_OTYPE_PUSHPULL;
+//	handlerPinDisplay_a.GPIO_PinConfig.GPIO_PinPuPdControl 					= GPIO_PUPDR_NOTHING;
+//	handlerPinDisplay_a.GPIO_PinConfig.GPIO_PinSpeed 						= GPIO_OSPEED_MEDIUM;
+//	handlerPinDisplay_a.GPIO_PinConfig.GPIO_PinAltFunMode					= AF0;
+//	GPIO_Config(&handlerPinDisplay_a);
+//
+//	/* Configuración del  segmento "b" del display LISTO */
+//	handlerPinDisplay_b.pGPIOx 												= GPIOB;
+//	handlerPinDisplay_b.GPIO_PinConfig.GPIO_PinNumber			 			= PIN_7;
+//	handlerPinDisplay_b.GPIO_PinConfig.GPIO_PinMode 						= GPIO_MODE_OUT;
+//	handlerPinDisplay_b.GPIO_PinConfig.GPIO_PinOType 						= GPIO_OTYPE_PUSHPULL;
+//	handlerPinDisplay_b.GPIO_PinConfig.GPIO_PinPuPdControl 					= GPIO_PUPDR_NOTHING;
+//	handlerPinDisplay_b.GPIO_PinConfig.GPIO_PinSpeed 						= GPIO_OSPEED_MEDIUM;
+//	handlerPinDisplay_b.GPIO_PinConfig.GPIO_PinAltFunMode					= AF0;
+//	GPIO_Config(&handlerPinDisplay_b);
+//
+//	/* Configuración del segmento "c" del display LISTO */
+//	handlerPinDisplay_c.pGPIOx 												= GPIOB;
+//	handlerPinDisplay_c.GPIO_PinConfig.GPIO_PinNumber			 			= PIN_6;
+//	handlerPinDisplay_c.GPIO_PinConfig.GPIO_PinMode 						= GPIO_MODE_OUT;
+//	handlerPinDisplay_c.GPIO_PinConfig.GPIO_PinOType 						= GPIO_OTYPE_PUSHPULL;
+//	handlerPinDisplay_c.GPIO_PinConfig.GPIO_PinPuPdControl 					= GPIO_PUPDR_NOTHING;
+//	handlerPinDisplay_c.GPIO_PinConfig.GPIO_PinSpeed 						= GPIO_OSPEED_MEDIUM;
+//	handlerPinDisplay_c.GPIO_PinConfig.GPIO_PinAltFunMode					= AF0;
+//	GPIO_Config(&handlerPinDisplay_c);
+//
+//	/* Configuración del segmento "d" del display LISTO */
+//	handlerPinDisplay_d.pGPIOx 												= GPIOB;
+//	handlerPinDisplay_d.GPIO_PinConfig.GPIO_PinNumber			 			= PIN_0;
+//	handlerPinDisplay_d.GPIO_PinConfig.GPIO_PinMode 						= GPIO_MODE_OUT;
+//	handlerPinDisplay_d.GPIO_PinConfig.GPIO_PinOType 						= GPIO_OTYPE_PUSHPULL;
+//	handlerPinDisplay_d.GPIO_PinConfig.GPIO_PinPuPdControl 					= GPIO_PUPDR_NOTHING;
+//	handlerPinDisplay_d.GPIO_PinConfig.GPIO_PinSpeed 						= GPIO_OSPEED_FAST;
+//	handlerPinDisplay_d.GPIO_PinConfig.GPIO_PinAltFunMode					= AF0;
+//	GPIO_Config(&handlerPinDisplay_d);
+//
+//	/* Configuración del segmento "e" del display LISTO */
+//	handlerPinDisplay_e.pGPIOx 												= GPIOC;
+//	handlerPinDisplay_e.GPIO_PinConfig.GPIO_PinNumber			 			= PIN_9;
+//	handlerPinDisplay_e.GPIO_PinConfig.GPIO_PinMode 						= GPIO_MODE_OUT;
+//	handlerPinDisplay_e.GPIO_PinConfig.GPIO_PinOType 						= GPIO_OTYPE_PUSHPULL;
+//	handlerPinDisplay_e.GPIO_PinConfig.GPIO_PinPuPdControl 					= GPIO_PUPDR_NOTHING;
+//	handlerPinDisplay_e.GPIO_PinConfig.GPIO_PinSpeed 						= GPIO_OSPEED_MEDIUM;
+//	handlerPinDisplay_e.GPIO_PinConfig.GPIO_PinAltFunMode					= AF0;
+//	GPIO_Config(&handlerPinDisplay_e);
+//
+//	/* Configuración del segmento "f" del display LISTO */
+//	handlerPinDisplay_f.pGPIOx 												= GPIOA;
+//	handlerPinDisplay_f.GPIO_PinConfig.GPIO_PinNumber			 			= PIN_1;
+//	handlerPinDisplay_f.GPIO_PinConfig.GPIO_PinMode 						= GPIO_MODE_OUT;
+//	handlerPinDisplay_f.GPIO_PinConfig.GPIO_PinOType 						= GPIO_OTYPE_PUSHPULL;
+//	handlerPinDisplay_f.GPIO_PinConfig.GPIO_PinPuPdControl 					= GPIO_PUPDR_NOTHING;
+//	handlerPinDisplay_f.GPIO_PinConfig.GPIO_PinSpeed 						= GPIO_OSPEED_MEDIUM;
+//	handlerPinDisplay_f.GPIO_PinConfig.GPIO_PinAltFunMode					= AF0;
+//	GPIO_Config(&handlerPinDisplay_f);
+//
+//	/* Configuración del segmento "g" del display LISTO */
+//	handlerPinDisplay_g.pGPIOx 												= GPIOC;
+//	handlerPinDisplay_g.GPIO_PinConfig.GPIO_PinNumber			 			= PIN_8;
+//	handlerPinDisplay_g.GPIO_PinConfig.GPIO_PinMode 						= GPIO_MODE_OUT;
+//	handlerPinDisplay_g.GPIO_PinConfig.GPIO_PinOType 						= GPIO_OTYPE_PUSHPULL;
+//	handlerPinDisplay_g.GPIO_PinConfig.GPIO_PinPuPdControl 					= GPIO_PUPDR_NOTHING;
+//	handlerPinDisplay_g.GPIO_PinConfig.GPIO_PinSpeed 						= GPIO_OSPEED_MEDIUM;
+//	handlerPinDisplay_g.GPIO_PinConfig.GPIO_PinAltFunMode					= AF0;
+//	GPIO_Config(&handlerPinDisplay_g);
+//
+//	/* Configuración del transistor 1 */
+//	handlerTransistor1.pGPIOx 												= GPIOC;
+//	handlerTransistor1.GPIO_PinConfig.GPIO_PinNumber			 			= PIN_10;
+//	handlerTransistor1.GPIO_PinConfig.GPIO_PinMode 							= GPIO_MODE_OUT;
+//	handlerTransistor1.GPIO_PinConfig.GPIO_PinOType 						= GPIO_OTYPE_PUSHPULL;
+//	handlerTransistor1.GPIO_PinConfig.GPIO_PinPuPdControl 					= GPIO_PUPDR_NOTHING;
+//	handlerTransistor1.GPIO_PinConfig.GPIO_PinSpeed 						= GPIO_OSPEED_MEDIUM;
+//	handlerTransistor1.GPIO_PinConfig.GPIO_PinAltFunMode					= AF0;
+//	GPIO_Config(&handlerTransistor1);
+//
+//	/* Configuración del transistor 2 */
+//	handlerTransistor2.pGPIOx 												= GPIOC;
+//	handlerTransistor2.GPIO_PinConfig.GPIO_PinNumber			 			= PIN_12;
+//	handlerTransistor2.GPIO_PinConfig.GPIO_PinMode 							= GPIO_MODE_OUT;
+//	handlerTransistor2.GPIO_PinConfig.GPIO_PinOType 						= GPIO_OTYPE_PUSHPULL;
+//	handlerTransistor2.GPIO_PinConfig.GPIO_PinPuPdControl 					= GPIO_PUPDR_NOTHING;
+//	handlerTransistor2.GPIO_PinConfig.GPIO_PinSpeed 						= GPIO_OSPEED_MEDIUM;
+//	handlerTransistor2.GPIO_PinConfig.GPIO_PinAltFunMode					= AF0;
+//	GPIO_Config(&handlerTransistor2);
 
 	//Cargamos la configuración del EXTI
 
@@ -418,7 +418,7 @@ void BasicTimer2_Callback(void){
 
 void callback_extInt13(void){
 	encoderEdge = 1;        //Subiendo la bandera
-	s++;
+	p++;
 }
 
 //void callback_extInt7(void){

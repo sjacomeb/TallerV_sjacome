@@ -40,19 +40,7 @@ int main(void){
 
 	while(1){
 
-		if((encoderEdge ==1) && (GPIO_ReadPin(&handlerDT)==0)){
 
-			counterEncoder--;
-
-			encoderEdge = 0;
-		}else if((encoderEdge == 1) && (GPIO_ReadPin(&handlerDT)==1)){
-
-			counterEncoder++;
-
-			encoderEdge = 0;
-		}
-
-		estado = GPIO_ReadPin(&handlerDT);
 	}
 	return 0;
 }
@@ -69,8 +57,8 @@ void init_Hardware(void){
 	GPIO_Config(&handlerLED2);
 
 	/* Configuración del Pin PC7 (CLK) */
-	handlerCLK.pGPIOx = GPIOC;
-	handlerCLK.GPIO_PinConfig.GPIO_PinNumber 	= PIN_7;
+	handlerCLK.pGPIOx = GPIOB;
+	handlerCLK.GPIO_PinConfig.GPIO_PinNumber 	= PIN_8;
 	handlerCLK.GPIO_PinConfig.GPIO_PinMode 	= GPIO_MODE_IN;
 	handlerCLK.GPIO_PinConfig.GPIO_PinOType	= GPIO_OTYPE_PUSHPULL;
 	handlerCLK.GPIO_PinConfig.GPIO_PinSpeed	= GPIO_OSPEED_FAST;
@@ -78,7 +66,7 @@ void init_Hardware(void){
 	GPIO_Config(&handlerCLK);
 
 	/* Configuración del Pin PB8 (DT) */
-	handlerDT.pGPIOx = GPIOA;
+	handlerDT.pGPIOx = GPIOC;
 	handlerDT.GPIO_PinConfig.GPIO_PinNumber 	= PIN_13;
 	handlerDT.GPIO_PinConfig.GPIO_PinMode 	= GPIO_MODE_IN;
 	handlerDT.GPIO_PinConfig.GPIO_PinOType	= GPIO_OTYPE_PUSHPULL;
@@ -104,12 +92,9 @@ void init_Hardware(void){
 //	GPIO_Config(&handlerUserButtonSW);
 
 	//Cargamos la configuración del EXTI
-	ExtiClock.pGPIOHandler = &handlerCLK;
+	ExtiClock.pGPIOHandler = &handlerDT;
 	ExtiClock.edgeType = EXTERNAL_INTERRUPT_FALLING_EDGE;
 	extInt_Config(&ExtiClock);
-
-
-
 
 
 }
