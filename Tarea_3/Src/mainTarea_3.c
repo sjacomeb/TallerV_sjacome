@@ -43,12 +43,15 @@ uint8_t buttonEdge = 0;   //Bandera para interrupción del botón
 uint8_t l=0;              //Variable para probar funcionamiento del encoder
 uint8_t s=0;              //Variable para probar funcionamiento del botón
 uint8_t counter = 0;
+uint8_t snake = 0;
 uint8_t t=0;
 
 void init_Hardware(void);
 void displayNumber (uint8_t number);
+void contadorEncoder(uint8_t *pCounter, uint8_t *pEncoderEdge);
+void culebrita(uint8_t variable);
 void callback_extInt13(void);
-void callback_extInt7(void);
+void callback_extInt6(void);
 void BasicTimer2_Callback(void);
 void BasicTimer3_Callback(void);
 
@@ -60,30 +63,26 @@ int main(void){
 
 	while(1){
 
+		if(buttonEdge == 0){
+			contadorEncoder(&counter, &encoderEdge);
+			displayNumber(counter);
 
-		if((GPIO_ReadPin(&handlerDT) == 1) && (encoderEdge == 1)){
-	        if(counter > 99){
-	        	counter = 99;
-	        } else {
-			counter++;
-			encoderEdge = 0;
-	        }
+		}else if(buttonEdge == 1){       //Definir bien culebrita
+			culebrita(0);
+			if((GPIO_ReadPin(&handlerDT) == 1) && (encoderEdge == 1)){
+				snake++;
+				encoderEdge = 0;
+				culebrita(snake);
+			}
 		}
-		else if((GPIO_ReadPin(&handlerDT) == 0) && (encoderEdge == 1)){
-	        if(counter <= 0){
-	        	counter = 0;
-	        } else {
-			counter--;
-			encoderEdge = 0;
-	        }
-		}
-		displayNumber(counter);
+
 	}
 
 	return 0;
 }
 
-/*Esta función que recibe la información del encoder y hace el conteo de 0 a 99 */
+/*Esta función que recibe la información del encoder y hace el conteo de 0 a 99, también
+ * me muestra las unidades y decenas */
 void contadorEncoder(uint8_t *pCounter, uint8_t *pEncoderEdge){
 
 	if((GPIO_ReadPin(&handlerDT) == 1) && (*pEncoderEdge == 1)){
@@ -101,6 +100,15 @@ void contadorEncoder(uint8_t *pCounter, uint8_t *pEncoderEdge){
 		(*pCounter)--;
 		*pEncoderEdge = 0;
 		}
+	}
+	if(*pCounter>9){
+		displayNumber(*pCounter%10);
+		GPIO_WritePin(&handlerTransistor1, RESET); // Transistor encendido
+		GPIO_WritePin(&handlerTransistor2, RESET);
+	}else{
+		displayNumber((*pCounter - (*pCounter%10))/10);
+		GPIO_WritePin(&handlerTransistor2, RESET);
+		GPIO_WritePin(&handlerTransistor1, RESET);
 	}
 }
 
@@ -203,13 +211,13 @@ void displayNumber (uint8_t number){
 	}
 }
 
-void culebrita(uint8_t variable){
+void culebrita(uint8_t variable){     //Cambiar estado de los transistores
 	switch (variable){
 
 	case 0: {
 		//Segmento a (unidades)
-		GPIO_WritePin(&handlerTransistor1, SET);
-		GPIO_WritePin(&handlerTransistor2, RESET);
+		GPIO_WritePin(&handlerTransistor1, RESET);
+		GPIO_WritePin(&handlerTransistor2, SET);
 
 		GPIO_WritePin(&handlerPinDisplay_a, RESET);
 		GPIO_WritePin(&handlerPinDisplay_b, SET);
@@ -441,8 +449,8 @@ void init_Hardware(void){
 	GPIO_Config(&handlerDT);
 
 	/* Configuración del SW */
-	handlerButton.pGPIOx 										= GPIOA;
-	handlerButton.GPIO_PinConfig.GPIO_PinNumber					= PIN_9;
+	handlerButton.pGPIOx 										= GPIOC;
+	handlerButton.GPIO_PinConfig.GPIO_PinNumber					= PIN_6;
 	handlerButton.GPIO_PinConfig.GPIO_PinMode					= GPIO_MODE_IN;
 	handlerButton.GPIO_PinConfig.GPIO_PinOType					= GPIO_OTYPE_PUSHPULL;
 	handlerButton.GPIO_PinConfig.GPIO_PinSpeed					= GPIO_OSPEED_MEDIUM;
@@ -520,7 +528,7 @@ void init_Hardware(void){
 	handlerPinDisplay_g.GPIO_PinConfig.GPIO_PinAltFunMode					= AF0;
 	GPIO_Config(&handlerPinDisplay_g);
 
-	/* Configuración del transistor 1 */
+	/* Configuración del transistor 1 (unidades) */
 	handlerTransistor1.pGPIOx 												= GPIOC;
 	handlerTransistor1.GPIO_PinConfig.GPIO_PinNumber			 			= PIN_10;
 	handlerTransistor1.GPIO_PinConfig.GPIO_PinMode 							= GPIO_MODE_OUT;
@@ -530,7 +538,7 @@ void init_Hardware(void){
 	handlerTransistor1.GPIO_PinConfig.GPIO_PinAltFunMode					= AF0;
 	GPIO_Config(&handlerTransistor1);
 
-	/* Configuración del transistor 2 */
+	/* Configuración del transistor 2 (decenas) */
 	handlerTransistor2.pGPIOx 												= GPIOC;
 	handlerTransistor2.GPIO_PinConfig.GPIO_PinNumber			 			= PIN_12;
 	handlerTransistor2.GPIO_PinConfig.GPIO_PinMode 							= GPIO_MODE_OUT;
@@ -558,17 +566,17 @@ void BasicTimer2_Callback(void){
 	GPIOxTooglePin(&handlerLED2);
 }
 
-//void BasicTimer3_Callback(void){
+void BasicTimer3_Callback(void){
 //	GPIOxTooglePin(&handlerTransistor1);
-//}
+}
 
 void callback_extInt13(void){
 	encoderEdge = 1;  //Subiendo la bandera
 	l++;
 }
 
-//void callback_extInt7(void){
-//	buttonEdge = 1;
-//	s++;
-//}
+void callback_extInt6(void){
+	buttonEdge = 1;
+	s++;
+}
 

@@ -232,9 +232,8 @@ void displayNumber (uint8_t number){
 		GPIO_WritePin(&handlerPinDisplay_f, RESET);
 		GPIO_WritePin(&handlerPinDisplay_g, RESET);
 		break;
-	default:{
+	default:
 		break;
-	}
 	}
 }
 
