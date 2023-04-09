@@ -42,15 +42,14 @@ uint8_t encoderEdge = 0;  //Bandera para interrupción del giro
 uint8_t buttonEdge = 0;   //Bandera para interrupción del botón
 uint8_t l=0;              //Variable para el estado del transistor 1
 uint8_t s=0;              //Variable para probar funcionamiento del botón
-uint8_t counter = 0;
-uint8_t snake = 0;
+uint8_t counter = 0;      //Contador para los números
+uint8_t snake = 0;		 //Variable para la función culebrita
 
 void init_Hardware(void);
 void displayNumber (uint8_t number);
-void contadorEncoder(uint8_t *pCounter, uint8_t *pEncoderEdge);
 void culebrita(uint8_t variable);
 void callback_extInt13(void);
-void callback_extInt6(void);
+void callback_extInt8(void);
 void BasicTimer2_Callback(void);
 void BasicTimer3_Callback(void);
 
@@ -62,53 +61,62 @@ int main(void){
 
 	while(1){
 
-		if((GPIO_ReadPin(&handlerDT) == 1) && (encoderEdge == 1)){
-			if(counter > 99){
-				counter = 99;
-			} else {
-			counter++;
-			encoderEdge = 0;
+		/*Entrar en modo números*/
+		if(buttonEdge == 0){
+			if((GPIO_ReadPin(&handlerDT) == 1) && (encoderEdge == 1)){
+				if(counter > 99){
+					counter = 99;
+				} else {
+				counter++;
+				encoderEdge = 0;
+				}
+			}
+			else if((GPIO_ReadPin(&handlerDT) == 0) && (encoderEdge == 1)){
+				if(counter <= 0){
+					counter = 0;
+				} else {
+				counter--;
+				encoderEdge = 0;
+				}
+			}
+
+			/*Definición de estados de los transistores*/
+			GPIO_WritePin(&handlerTransistor1, l);
+			GPIO_WritePin(&handlerTransistor2, !l);
+
+			/*Mostrar las unidades y decenas*/
+			if(GPIO_ReadPin(&handlerTransistor1) == 1){
+				GPIO_WritePin(&handlerTransistor1, SET);     // Transistor encendido
+				GPIO_WritePin(&handlerTransistor2, RESET);
+				displayNumber(counter%10);                   //Muestra las unidades
+
+			}else if(GPIO_ReadPin(&handlerTransistor1)== 0){
+			GPIO_WritePin(&handlerTransistor1, RESET);
+			GPIO_WritePin(&handlerTransistor2, SET);
+			displayNumber(counter/10);                     //Muestra las decenas
+			}
+
+		/*Entrar en modo culebrita*/
+		}else if(buttonEdge == 1){
+			culebrita(snake);
+			if((GPIO_ReadPin(&handlerDT) == 1) && (encoderEdge == 1)){
+				if(snake > 11){
+					snake = 0;
+				} else {
+				snake++;
+				encoderEdge = 0;
+				}
+
+			}else if((GPIO_ReadPin(&handlerDT) == 0) && (encoderEdge == 1)){
+				if(snake <= 0){
+					snake = 11;
+				} else {
+				snake--;
+				encoderEdge = 0;
+				}
+			culebrita(snake);
 			}
 		}
-		else if((GPIO_ReadPin(&handlerDT) == 0) && (encoderEdge == 1)){
-			if(counter <= 0){
-				counter = 0;
-			} else {
-			counter--;
-			encoderEdge = 0;
-			}
-		}
-
-		GPIO_WritePin(&handlerTransistor1, l);
-		GPIO_WritePin(&handlerTransistor2, !l);
-
-		if(GPIO_ReadPin(&handlerTransistor1) == 1){
-			GPIO_WritePin(&handlerTransistor1, SET);     // Transistor encendido
-			GPIO_WritePin(&handlerTransistor2, RESET);
-			displayNumber(counter%10);                   //Muestra las unidades
-
-		}else if(GPIO_ReadPin(&handlerTransistor1)== 0){
-		GPIO_WritePin(&handlerTransistor1, RESET);
-		GPIO_WritePin(&handlerTransistor2, SET);
-		displayNumber(counter/10);                     //Muestra las decenas
-		}
-
-
-
-
-
-//		if(buttonEdge == 0){
-//			contadorEncoder(&counter, &encoderEdge);
-//			displayNumber(counter);
-//
-//		}else if(buttonEdge == 1){       //Definir bien culebrita
-//			culebrita(0);
-//			if((GPIO_ReadPin(&handlerDT) == 1) && (encoderEdge == 1)){
-//				snake++;
-//				encoderEdge = 0;
-//				culebrita(snake);
-//			}
-//		}
 
 	}
 
@@ -214,6 +222,7 @@ void displayNumber (uint8_t number){
 	}
 }
 
+/*Esta funcion es encargada de encender cada segmento en el display para el modo culebrita */
 void culebrita(uint8_t variable){
 	switch (variable){
 
@@ -432,7 +441,7 @@ void init_Hardware(void){
 	BasicTimer_Config(&handlerTimerDisplay);
 
 
-	/* Configuración del CLK LISTO */
+	/* Configuración del CLK  */
 	handlerCLK.pGPIOx = GPIOC;
 	handlerCLK.GPIO_PinConfig.GPIO_PinNumber 	      = PIN_13;
 	handlerCLK.GPIO_PinConfig.GPIO_PinMode 	          = GPIO_MODE_IN;
@@ -442,7 +451,7 @@ void init_Hardware(void){
 	GPIO_Config(&handlerCLK);
 
 
-	/* Configuración del DT LISTO */
+	/* Configuración del DT */
 	handlerDT.pGPIOx = GPIOD;
 	handlerDT.GPIO_PinConfig.GPIO_PinNumber 	      = PIN_2;
 	handlerDT.GPIO_PinConfig.GPIO_PinMode 	          = GPIO_MODE_IN;
@@ -452,8 +461,8 @@ void init_Hardware(void){
 	GPIO_Config(&handlerDT);
 
 	/* Configuración del SW */
-	handlerButton.pGPIOx 										= GPIOC;
-	handlerButton.GPIO_PinConfig.GPIO_PinNumber					= PIN_6;
+	handlerButton.pGPIOx 										= GPIOB;
+	handlerButton.GPIO_PinConfig.GPIO_PinNumber					= PIN_8;
 	handlerButton.GPIO_PinConfig.GPIO_PinMode					= GPIO_MODE_IN;
 	handlerButton.GPIO_PinConfig.GPIO_PinOType					= GPIO_OTYPE_PUSHPULL;
 	handlerButton.GPIO_PinConfig.GPIO_PinSpeed					= GPIO_OSPEED_MEDIUM;
@@ -461,7 +470,7 @@ void init_Hardware(void){
 	handlerButton.GPIO_PinConfig.GPIO_PinAltFunMode				= AF0;
 	GPIO_Config(&handlerButton);
 
-	/* Configuración del segmento "a" del display LISTO */
+	/* Configuración del segmento "a" del display */
 	handlerPinDisplay_a.pGPIOx 												= GPIOA;
 	handlerPinDisplay_a.GPIO_PinConfig.GPIO_PinNumber			 			= PIN_0;
 	handlerPinDisplay_a.GPIO_PinConfig.GPIO_PinMode 						= GPIO_MODE_OUT;
@@ -471,7 +480,7 @@ void init_Hardware(void){
 	handlerPinDisplay_a.GPIO_PinConfig.GPIO_PinAltFunMode					= AF0;
 	GPIO_Config(&handlerPinDisplay_a);
 
-	/* Configuración del  segmento "b" del display LISTO */
+	/* Configuración del  segmento "b" del display */
 	handlerPinDisplay_b.pGPIOx 												= GPIOB;
 	handlerPinDisplay_b.GPIO_PinConfig.GPIO_PinNumber			 			= PIN_7;
 	handlerPinDisplay_b.GPIO_PinConfig.GPIO_PinMode 						= GPIO_MODE_OUT;
@@ -481,7 +490,7 @@ void init_Hardware(void){
 	handlerPinDisplay_b.GPIO_PinConfig.GPIO_PinAltFunMode					= AF0;
 	GPIO_Config(&handlerPinDisplay_b);
 
-	/* Configuración del segmento "c" del display LISTO */
+	/* Configuración del segmento "c" del display */
 	handlerPinDisplay_c.pGPIOx 												= GPIOB;
 	handlerPinDisplay_c.GPIO_PinConfig.GPIO_PinNumber			 			= PIN_6;
 	handlerPinDisplay_c.GPIO_PinConfig.GPIO_PinMode 						= GPIO_MODE_OUT;
@@ -491,7 +500,7 @@ void init_Hardware(void){
 	handlerPinDisplay_c.GPIO_PinConfig.GPIO_PinAltFunMode					= AF0;
 	GPIO_Config(&handlerPinDisplay_c);
 
-	/* Configuración del segmento "d" del display LISTO */
+	/* Configuración del segmento "d" del display */
 	handlerPinDisplay_d.pGPIOx 												= GPIOC;
 	handlerPinDisplay_d.GPIO_PinConfig.GPIO_PinNumber			 			= PIN_5;
 	handlerPinDisplay_d.GPIO_PinConfig.GPIO_PinMode 						= GPIO_MODE_OUT;
@@ -501,7 +510,7 @@ void init_Hardware(void){
 	handlerPinDisplay_d.GPIO_PinConfig.GPIO_PinAltFunMode					= AF0;
 	GPIO_Config(&handlerPinDisplay_d);
 
-	/* Configuración del segmento "e" del display LISTO */
+	/* Configuración del segmento "e" del display */
 	handlerPinDisplay_e.pGPIOx 												= GPIOC;
 	handlerPinDisplay_e.GPIO_PinConfig.GPIO_PinNumber			 			= PIN_9;
 	handlerPinDisplay_e.GPIO_PinConfig.GPIO_PinMode 						= GPIO_MODE_OUT;
@@ -511,7 +520,7 @@ void init_Hardware(void){
 	handlerPinDisplay_e.GPIO_PinConfig.GPIO_PinAltFunMode					= AF0;
 	GPIO_Config(&handlerPinDisplay_e);
 
-	/* Configuración del segmento "f" del display LISTO */
+	/* Configuración del segmento "f" del display */
 	handlerPinDisplay_f.pGPIOx 												= GPIOA;
 	handlerPinDisplay_f.GPIO_PinConfig.GPIO_PinNumber			 			= PIN_1;
 	handlerPinDisplay_f.GPIO_PinConfig.GPIO_PinMode 						= GPIO_MODE_OUT;
@@ -521,7 +530,7 @@ void init_Hardware(void){
 	handlerPinDisplay_f.GPIO_PinConfig.GPIO_PinAltFunMode					= AF0;
 	GPIO_Config(&handlerPinDisplay_f);
 
-	/* Configuración del segmento "g" del display LISTO */
+	/* Configuración del segmento "g" del display */
 	handlerPinDisplay_g.pGPIOx 												= GPIOC;
 	handlerPinDisplay_g.GPIO_PinConfig.GPIO_PinNumber			 			= PIN_8;
 	handlerPinDisplay_g.GPIO_PinConfig.GPIO_PinMode 						= GPIO_MODE_OUT;
@@ -578,8 +587,8 @@ void callback_extInt13(void){
 	encoderEdge = 1;  //Subiendo la bandera
 }
 
-void callback_extInt6(void){
-	buttonEdge = 1;
+void callback_extInt8(void){
+	buttonEdge = !buttonEdge;
 	s++;
 }
 
