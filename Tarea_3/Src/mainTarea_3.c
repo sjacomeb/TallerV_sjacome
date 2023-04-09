@@ -40,11 +40,10 @@ EXTI_Config_t ExtiButton = {0};
 /*Variables */
 uint8_t encoderEdge = 0;  //Bandera para interrupción del giro
 uint8_t buttonEdge = 0;   //Bandera para interrupción del botón
-uint8_t l=0;              //Variable para probar funcionamiento del encoder
+uint8_t l=0;              //Variable para el estado del transistor 1
 uint8_t s=0;              //Variable para probar funcionamiento del botón
 uint8_t counter = 0;
 uint8_t snake = 0;
-uint8_t t=0;            //Variable para verificar el estado del data
 
 void init_Hardware(void);
 void displayNumber (uint8_t number);
@@ -63,12 +62,9 @@ int main(void){
 
 	while(1){
 
-
-		GPIO_WritePin(&handlerTransistor1, RESET);
-
 		if((GPIO_ReadPin(&handlerDT) == 1) && (encoderEdge == 1)){
-			if(counter > 9){
-				counter = 9;
+			if(counter > 99){
+				counter = 99;
 			} else {
 			counter++;
 			encoderEdge = 0;
@@ -82,7 +78,20 @@ int main(void){
 			encoderEdge = 0;
 			}
 		}
-		displayNumber(counter);
+
+		GPIO_WritePin(&handlerTransistor1, l);
+		GPIO_WritePin(&handlerTransistor2, !l);
+
+		if(GPIO_ReadPin(&handlerTransistor1) == 1){
+			GPIO_WritePin(&handlerTransistor1, SET);     // Transistor encendido
+			GPIO_WritePin(&handlerTransistor2, RESET);
+			displayNumber(counter%10);                   //Muestra las unidades
+
+		}else if(GPIO_ReadPin(&handlerTransistor1)== 0){
+		GPIO_WritePin(&handlerTransistor1, RESET);
+		GPIO_WritePin(&handlerTransistor2, SET);
+		displayNumber(counter/10);                     //Muestra las decenas
+		}
 
 
 
@@ -104,37 +113,6 @@ int main(void){
 	}
 
 	return 0;
-}
-
-/*Esta función que recibe la información del encoder y hace el conteo de 0 a 99, también
- * me muestra las unidades y decenas */
-void contadorEncoder(uint8_t *pCounter, uint8_t *pEncoderEdge){
-
-	if((GPIO_ReadPin(&handlerDT) == 1) && (*pEncoderEdge == 1)){
-		if(*pCounter > 99){
-			*pCounter = 99;
-		} else {
-		(*pCounter)++;
-		*pEncoderEdge = 0;
-		}
-	}
-	else if((GPIO_ReadPin(&handlerDT) == 0) && (*pEncoderEdge == 1)){
-		if(*pCounter <= 0){
-			*pCounter = 0;
-		} else {
-		(*pCounter)--;
-		*pEncoderEdge = 0;
-		}
-	}
-	if(*pCounter>9){
-		displayNumber(*pCounter%10);
-		GPIO_WritePin(&handlerTransistor1, RESET); // Transistor encendido
-		GPIO_WritePin(&handlerTransistor2, RESET);
-	}else{
-		displayNumber((*pCounter - (*pCounter%10))/10);
-		GPIO_WritePin(&handlerTransistor2, RESET);
-		GPIO_WritePin(&handlerTransistor1, RESET);
-	}
 }
 
 /*Esta funcion es encargada de configurar los pines GPIO correspondiente a cada segmento en el display
@@ -236,13 +214,13 @@ void displayNumber (uint8_t number){
 	}
 }
 
-void culebrita(uint8_t variable){     //Cambiar estado de los transistores
+void culebrita(uint8_t variable){
 	switch (variable){
 
 	case 0: {
 		//Segmento a (unidades)
-		GPIO_WritePin(&handlerTransistor1, RESET);
-		GPIO_WritePin(&handlerTransistor2, SET);
+		GPIO_WritePin(&handlerTransistor1, SET);
+		GPIO_WritePin(&handlerTransistor2, RESET);
 
 		GPIO_WritePin(&handlerPinDisplay_a, RESET);
 		GPIO_WritePin(&handlerPinDisplay_b, SET);
@@ -256,8 +234,8 @@ void culebrita(uint8_t variable){     //Cambiar estado de los transistores
 	}
 	case 1: {
 		//Segmento a (decenas)
-		GPIO_WritePin(&handlerTransistor1, SET);
-		GPIO_WritePin(&handlerTransistor2, RESET);
+		GPIO_WritePin(&handlerTransistor1, RESET);
+		GPIO_WritePin(&handlerTransistor2, SET);
 
 		GPIO_WritePin(&handlerPinDisplay_a, RESET);
 		GPIO_WritePin(&handlerPinDisplay_b, SET);
@@ -271,8 +249,8 @@ void culebrita(uint8_t variable){     //Cambiar estado de los transistores
 	}
 	case 2:{
 		//Segmento f (decenas)
-		GPIO_WritePin(&handlerTransistor1, SET);
-		GPIO_WritePin(&handlerTransistor2, RESET);
+		GPIO_WritePin(&handlerTransistor1, RESET);
+		GPIO_WritePin(&handlerTransistor2, SET);
 
 
 		GPIO_WritePin(&handlerPinDisplay_a, SET);
@@ -287,8 +265,8 @@ void culebrita(uint8_t variable){     //Cambiar estado de los transistores
 	}
 	case 3:{
 		//Segmento e (decenas)
-		GPIO_WritePin(&handlerTransistor1, SET);
-		GPIO_WritePin(&handlerTransistor2, RESET);
+		GPIO_WritePin(&handlerTransistor1, RESET);
+		GPIO_WritePin(&handlerTransistor2, SET);
 
 		GPIO_WritePin(&handlerPinDisplay_a, SET);
 		GPIO_WritePin(&handlerPinDisplay_b, SET);
@@ -302,8 +280,8 @@ void culebrita(uint8_t variable){     //Cambiar estado de los transistores
 	}
 	case 4:{
 		//Segmento d (decenas)
-		GPIO_WritePin(&handlerTransistor1, SET);
-		GPIO_WritePin(&handlerTransistor2, RESET);
+		GPIO_WritePin(&handlerTransistor1, RESET);
+		GPIO_WritePin(&handlerTransistor2, SET);
 
 		GPIO_WritePin(&handlerPinDisplay_a, SET);
 		GPIO_WritePin(&handlerPinDisplay_b, SET);
@@ -317,8 +295,8 @@ void culebrita(uint8_t variable){     //Cambiar estado de los transistores
 	}
 	case 5:{
 		//Segmento e (unidades)
-		GPIO_WritePin(&handlerTransistor1, RESET);
-		GPIO_WritePin(&handlerTransistor2, SET);
+		GPIO_WritePin(&handlerTransistor1, SET);
+		GPIO_WritePin(&handlerTransistor2, RESET);
 
 		GPIO_WritePin(&handlerPinDisplay_a, SET);
 		GPIO_WritePin(&handlerPinDisplay_b, SET);
@@ -332,8 +310,8 @@ void culebrita(uint8_t variable){     //Cambiar estado de los transistores
 	}
 	case 6:{
 		//Segmento f (unidades)
-		GPIO_WritePin(&handlerTransistor1, RESET);
-		GPIO_WritePin(&handlerTransistor2, SET);
+		GPIO_WritePin(&handlerTransistor1, SET);
+		GPIO_WritePin(&handlerTransistor2, RESET);
 
 		GPIO_WritePin(&handlerPinDisplay_a, SET);
 		GPIO_WritePin(&handlerPinDisplay_b, SET);
@@ -347,8 +325,8 @@ void culebrita(uint8_t variable){     //Cambiar estado de los transistores
 	}
 	case 7: {
 		//Segmento b (decenas)
-		GPIO_WritePin(&handlerTransistor1, SET);
-		GPIO_WritePin(&handlerTransistor2, RESET);
+		GPIO_WritePin(&handlerTransistor1, RESET);
+		GPIO_WritePin(&handlerTransistor2, SET);
 
 		GPIO_WritePin(&handlerPinDisplay_a, SET);
 		GPIO_WritePin(&handlerPinDisplay_b, RESET);
@@ -362,8 +340,8 @@ void culebrita(uint8_t variable){     //Cambiar estado de los transistores
 	}
 	case 8: {
 		//Segmento c (decenas)
-		GPIO_WritePin(&handlerTransistor1, SET);
-		GPIO_WritePin(&handlerTransistor2, RESET);
+		GPIO_WritePin(&handlerTransistor1, RESET);
+		GPIO_WritePin(&handlerTransistor2, SET);
 
 		GPIO_WritePin(&handlerPinDisplay_a, SET);
 		GPIO_WritePin(&handlerPinDisplay_b, SET);
@@ -377,8 +355,8 @@ void culebrita(uint8_t variable){     //Cambiar estado de los transistores
 	}
 	case 9:{
 		//Segmento d (unidades)
-		GPIO_WritePin(&handlerTransistor1, RESET);
-		GPIO_WritePin(&handlerTransistor2, SET);
+		GPIO_WritePin(&handlerTransistor1, SET);
+		GPIO_WritePin(&handlerTransistor2, RESET);
 
 		GPIO_WritePin(&handlerPinDisplay_a, SET);
 		GPIO_WritePin(&handlerPinDisplay_b, SET);
@@ -392,8 +370,8 @@ void culebrita(uint8_t variable){     //Cambiar estado de los transistores
 	}
 	case 10 :{
 		//Segmento c (unidades)
-		GPIO_WritePin(&handlerTransistor1,  RESET);
-		GPIO_WritePin(&handlerTransistor2, SET);
+		GPIO_WritePin(&handlerTransistor1, SET);
+		GPIO_WritePin(&handlerTransistor2, RESET);
 
 		GPIO_WritePin(&handlerPinDisplay_a, SET);
 		GPIO_WritePin(&handlerPinDisplay_b, SET);
@@ -407,8 +385,8 @@ void culebrita(uint8_t variable){     //Cambiar estado de los transistores
 	}
 	case 11: {
 		//Segmento b (unidades)
-		GPIO_WritePin(&handlerTransistor1,  RESET);
-		GPIO_WritePin(&handlerTransistor2, SET);
+		GPIO_WritePin(&handlerTransistor1, SET);
+		GPIO_WritePin(&handlerTransistor2, RESET);
 
 		GPIO_WritePin(&handlerPinDisplay_a, SET);
 		GPIO_WritePin(&handlerPinDisplay_b, RESET);
@@ -446,10 +424,10 @@ void init_Hardware(void){
 	BasicTimer_Config(&handlerBlinkyTimer);
 
 	/* Configuración del TIM5 que controla el Display */
-	handlerTimerDisplay.ptrTIMx 							= TIM5;
+	handlerTimerDisplay.ptrTIMx 							= TIM3;
 	handlerTimerDisplay.TIMx_Config.TIMx_mode 				= BTIMER_MODE_UP;
 	handlerTimerDisplay.TIMx_Config.TIMx_speed 				= BTIMER_SPEED_1ms;
-	handlerTimerDisplay.TIMx_Config.TIMx_period 			= 250;
+	handlerTimerDisplay.TIMx_Config.TIMx_period 			= 10;
 	handlerTimerDisplay.TIMx_Config.TIMx_interruptEnable	= BTIMER_INTERRUP_ENABLE;
 	BasicTimer_Config(&handlerTimerDisplay);
 
@@ -555,7 +533,7 @@ void init_Hardware(void){
 
 	/* Configuración del transistor 1 (unidades) */
 	handlerTransistor1.pGPIOx 												= GPIOB;
-	handlerTransistor1.GPIO_PinConfig.GPIO_PinNumber			 			= PIN_8;
+	handlerTransistor1.GPIO_PinConfig.GPIO_PinNumber			 			= PIN_9;
 	handlerTransistor1.GPIO_PinConfig.GPIO_PinMode 							= GPIO_MODE_OUT;
 	handlerTransistor1.GPIO_PinConfig.GPIO_PinOType 						= GPIO_OTYPE_PUSHPULL;
 	handlerTransistor1.GPIO_PinConfig.GPIO_PinPuPdControl 					= GPIO_PUPDR_NOTHING;
@@ -563,6 +541,15 @@ void init_Hardware(void){
 	handlerTransistor1.GPIO_PinConfig.GPIO_PinAltFunMode					= AF0;
 	GPIO_Config(&handlerTransistor1);
 
+	/* Configuración del transistor 2 (decenas) */
+	handlerTransistor2.pGPIOx 												= GPIOC;
+	handlerTransistor2.GPIO_PinConfig.GPIO_PinNumber			 			= PIN_10;
+	handlerTransistor2.GPIO_PinConfig.GPIO_PinMode 							= GPIO_MODE_OUT;
+	handlerTransistor2.GPIO_PinConfig.GPIO_PinOType 						= GPIO_OTYPE_PUSHPULL;
+	handlerTransistor2.GPIO_PinConfig.GPIO_PinPuPdControl 					= GPIO_PUPDR_NOTHING;
+	handlerTransistor2.GPIO_PinConfig.GPIO_PinSpeed 						= GPIO_OSPEED_MEDIUM;
+	handlerTransistor2.GPIO_PinConfig.GPIO_PinAltFunMode					= AF0;
+	GPIO_Config(&handlerTransistor2);
 
 
 	//Cargamos la configuración del EXTI
@@ -584,12 +571,11 @@ void BasicTimer2_Callback(void){
 }
 
 void BasicTimer3_Callback(void){
-//	GPIOxTooglePin(&handlerTransistor1);
+	l = !l;
 }
 
 void callback_extInt13(void){
 	encoderEdge = 1;  //Subiendo la bandera
-	l++;
 }
 
 void callback_extInt6(void){
