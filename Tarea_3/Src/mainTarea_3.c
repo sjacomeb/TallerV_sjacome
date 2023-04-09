@@ -41,7 +41,6 @@ EXTI_Config_t ExtiButton = {0};
 uint8_t encoderEdge = 0;  //Bandera para interrupción del giro
 uint8_t buttonEdge = 0;   //Bandera para interrupción del botón
 uint8_t l=0;              //Variable para el estado del transistor 1
-uint8_t s=0;              //Variable para probar funcionamiento del botón
 uint8_t counter = 0;      //Contador para los números
 uint8_t snake = 0;		 //Variable para la función culebrita
 
@@ -63,14 +62,17 @@ int main(void){
 
 		/*Entrar en modo números*/
 		if(buttonEdge == 0){
+
+			/* Giro a la derecha del encoder*/
 			if((GPIO_ReadPin(&handlerDT) == 1) && (encoderEdge == 1)){
-				if(counter > 99){
+				if(counter >= 99){
 					counter = 99;
 				} else {
 				counter++;
 				encoderEdge = 0;
 				}
 			}
+			/*Giro a la izquierda del encoder */
 			else if((GPIO_ReadPin(&handlerDT) == 0) && (encoderEdge == 1)){
 				if(counter <= 0){
 					counter = 0;
@@ -79,6 +81,7 @@ int main(void){
 				encoderEdge = 0;
 				}
 			}
+			displayNumber(counter);
 
 			/*Definición de estados de los transistores*/
 			GPIO_WritePin(&handlerTransistor1, l);
@@ -87,7 +90,7 @@ int main(void){
 			/*Mostrar las unidades y decenas*/
 			if(GPIO_ReadPin(&handlerTransistor1) == 1){
 				GPIO_WritePin(&handlerTransistor1, SET);     // Transistor encendido
-				GPIO_WritePin(&handlerTransistor2, RESET);
+				GPIO_WritePin(&handlerTransistor2, RESET);   //Transistor apagado
 				displayNumber(counter%10);                   //Muestra las unidades
 
 			}else if(GPIO_ReadPin(&handlerTransistor1)== 0){
@@ -99,14 +102,16 @@ int main(void){
 		/*Entrar en modo culebrita*/
 		}else if(buttonEdge == 1){
 			culebrita(snake);
+
+			/* Giro a la derecha del encoder*/
 			if((GPIO_ReadPin(&handlerDT) == 1) && (encoderEdge == 1)){
-				if(snake > 11){
+				if(snake >= 11){
 					snake = 0;
 				} else {
 				snake++;
 				encoderEdge = 0;
 				}
-
+			/*Giro a la izquierda del encoder */
 			}else if((GPIO_ReadPin(&handlerDT) == 0) && (encoderEdge == 1)){
 				if(snake <= 0){
 					snake = 11;
@@ -114,7 +119,6 @@ int main(void){
 				snake--;
 				encoderEdge = 0;
 				}
-			culebrita(snake);
 			}
 		}
 
@@ -432,7 +436,7 @@ void init_Hardware(void){
 	handlerBlinkyTimer.TIMx_Config.TIMx_interruptEnable = BTIMER_INTERRUP_ENABLE;
 	BasicTimer_Config(&handlerBlinkyTimer);
 
-	/* Configuración del TIM5 que controla el Display */
+	/* Configuración del TIM3 que controla el Display */
 	handlerTimerDisplay.ptrTIMx 							= TIM3;
 	handlerTimerDisplay.TIMx_Config.TIMx_mode 				= BTIMER_MODE_UP;
 	handlerTimerDisplay.TIMx_Config.TIMx_speed 				= BTIMER_SPEED_1ms;
@@ -589,6 +593,5 @@ void callback_extInt13(void){
 
 void callback_extInt8(void){
 	buttonEdge = !buttonEdge;
-	s++;
 }
 
