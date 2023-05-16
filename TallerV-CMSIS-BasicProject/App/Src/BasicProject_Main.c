@@ -23,6 +23,13 @@ BasicTimer_Handler_t handlerBlinkyTimer 	= {0};
 
 EXTI_Config_t ExtiButton 					= {0};
 
+/*Elemento para hacer la comunicación serial*/
+
+GPIO_Handler_t handlerPinTx					= {0};
+GPIO_Handler_t handlerPinRx					= {0};
+USART_Handler_t usart2Comm 					= {0};
+uint8_t sendMsg = 0;
+
 //Definición de las cabeceras de las funciones del main
 void initSystem(void);
 
@@ -33,6 +40,11 @@ int main(void){
 
 	while(1){
 
+		if(sendMsg == 4){
+
+			writeMsg(&usart2Comm, "Hola Mundo");
+			sendMsg = 0;
+		}
 	}
 
 	return 0;
@@ -70,14 +82,40 @@ void initSystem(void){
 	ExtiButton.edgeType = EXTERNAL_INTERRUPT_RISING_EDGE;
 	extInt_Config(&ExtiButton);
 
+	/* Configuracion de la comunicación serial */
+	handlerPinTx.pGPIOx 								= GPIOA;
+	handlerPinTx.GPIO_PinConfig.GPIO_PinNumber 			= PIN_2;
+	handlerPinTx.GPIO_PinConfig.GPIO_PinMode 			= GPIO_MODE_ALTFN;
+	handlerPinTx.GPIO_PinConfig.GPIO_PinAltFunMode 		= AF7;
+	GPIO_Config(&handlerPinTx);
+
+	handlerPinRx.pGPIOx 								= GPIOA;
+	handlerPinRx.GPIO_PinConfig.GPIO_PinNumber 			= PIN_3;
+	handlerPinRx.GPIO_PinConfig.GPIO_PinMode 			= GPIO_MODE_ALTFN;
+	handlerPinRx.GPIO_PinConfig.GPIO_PinAltFunMode 		= AF7;
+	GPIO_Config(&handlerPinRx);
+
+	usart2Comm.ptrUSARTx									= USART2;
+	usart2Comm.USART_Config.USART_baudrate					= USART_BAUDRATE_115200;
+	usart2Comm.USART_Config.USART_datasize					= USART_DATASIZE_8BIT;
+	usart2Comm.USART_Config.USART_parity					= USART_PARITY_NONE;
+	usart2Comm.USART_Config.USART_mode						= USART_MODE_RXTX;
+	usart2Comm.USART_Config.USART_stopbits					= USART_STOPBIT_1;
+	usart2Comm.USART_Config.USART_enableIntRX				= USART_RX_INTERRUPT_DISABLE;
+	usart2Comm.USART_Config.USART_enableIntTX				= USART_TX_INTERRUPT_DISABLE;
+	USART_Config(&usart2Comm);
+
 }
 
 void BasicTimer2_Callback(void){
 	GPIOxTooglePin(&handlerBlinkyPin);
+	sendMsg++;
 }
 
 void callback_extInt13(void){
 	__NOP();
 }
+
+
 
 
