@@ -5,7 +5,7 @@
  */
 
 #include <stm32f4xx.h>
-#include "USARTxDriver.h"
+#include <USARTxDriver.h>
 
 /**
  * Configurando el puerto Serial...
@@ -14,6 +14,7 @@
  */
 
 uint8_t auxRxData = 0;
+
 
 void USART_Config(USART_Handler_t *ptrUsartHandler){
 	/* 1. Activamos la señal de reloj que viene desde el BUS al que pertenece el periferico */
@@ -80,27 +81,30 @@ void USART_Config(USART_Handler_t *ptrUsartHandler){
 	switch(ptrUsartHandler->USART_Config.USART_stopbits){
 	case USART_STOPBIT_1: {
 		// Debemos cargar el valor 0b00 en los dos bits de STOP
-		ptrUsartHandler->ptrUSARTx->CR2 |= USART_STOPBIT_1;
+		ptrUsartHandler->ptrUSARTx->CR2 &= ~USART_CR2_STOP;
 		break;
 	}
 	case USART_STOPBIT_0_5: {
 		// Debemos cargar el valor 0b01 en los dos bits de STOP
-		ptrUsartHandler->ptrUSARTx->CR2 |= USART_STOPBIT_0_5;
+		ptrUsartHandler->ptrUSARTx->CR2 &= ~USART_CR2_STOP;
+		ptrUsartHandler->ptrUSARTx->CR2 |= USART_CR2_STOP_0;
 		break;
 	}
 	case USART_STOPBIT_2: {
 		// Debemos cargar el valor 0b10 en los dos bits de STOP
-		ptrUsartHandler->ptrUSARTx->CR2 |= USART_STOPBIT_2;
+		ptrUsartHandler->ptrUSARTx->CR2 &= ~USART_CR2_STOP;
+		ptrUsartHandler->ptrUSARTx->CR2 |= USART_CR2_STOP_1;
 		break;
 	}
 	case USART_STOPBIT_1_5: {
 		// Debemoscargar el valor 0b11 en los dos bits de STOP
-		ptrUsartHandler->ptrUSARTx->CR2 |= USART_STOPBIT_1_5;
+		ptrUsartHandler->ptrUSARTx->CR2 &= ~USART_CR2_STOP;
+		ptrUsartHandler->ptrUSARTx->CR2 |= USART_CR2_STOP;
 		break;
 	}
 	default: {
 		// En el caso por defecto seleccionamos 1 bit de parada
-		ptrUsartHandler->ptrUSARTx->CR2 |= USART_STOPBIT_1;
+		ptrUsartHandler->ptrUSARTx->CR2 &= ~USART_CR2_STOP;
 		break;
 	}
 	}
@@ -137,12 +141,14 @@ void USART_Config(USART_Handler_t *ptrUsartHandler){
 	{
 		// Activamos la parte del sistema encargada de enviar
 		ptrUsartHandler->ptrUSARTx->CR1 |= USART_CR1_TE;
+		ptrUsartHandler->ptrUSARTx->CR1 &= ~USART_CR1_RE;  //Desactivamos RX por prevención
 		break;
 	}
 	case USART_MODE_RX:
 	{
 		// Activamos la parte del sistema encargada de recibir
 		ptrUsartHandler->ptrUSARTx->CR1 |= USART_CR1_RE;
+		ptrUsartHandler->ptrUSARTx->CR1 &= ~USART_CR1_TE;
 		break;
 	}
 	case USART_MODE_RXTX:
@@ -210,14 +216,20 @@ int writeChar(USART_Handler_t *ptrUsartHandler, char dataToSend ){
 
 /* Funcion para escribir un arreglo de caracteres*/
 void writeMsg(USART_Handler_t *ptrUsartHandler, char *msgToSend){
+	while( !(ptrUsartHandler->ptrUSARTx->SR & USART_SR_TXE)){
+		__NOP();
+	}
 
-	while(*msgToSend != '\0'){
-		writeChar(ptrUsartHandler, *msgToSend);
-		msgToSend++;
+	char dataToSend = 0;
+	int j=0;
+	while(msgToSend[j]){
+		dataToSend = msgToSend[j];
+		writeChar(ptrUsartHandler, dataToSend);
+		j++;
 	}
 
 }
-/* Lectura del caracter que llega para la ineterface serial */
+/* Lectura del caracter que llega para la interface serial */
 uint8_t getRxData(void){
 	return auxRxData;
 }

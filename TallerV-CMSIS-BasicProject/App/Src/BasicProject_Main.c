@@ -40,9 +40,19 @@ int main(void){
 
 	while(1){
 
-		if(sendMsg == 4){
+		if(printMsg > 4){
 
-			writeMsg(&usart2Comm, "Hola Mundo");
+			writeMsg(&usart2Comm, 'H');
+			writeMsg(&usart2Comm, 'O');
+			writeMsg(&usart2Comm, 'L');
+			writeMsg(&usart2Comm, 'A');
+			writeMsg(&usart2Comm, ' ');
+			writeMsg(&usart2Comm, 'M');
+			writeMsg(&usart2Comm, 'U');
+			writeMsg(&usart2Comm, 'N');
+			writeMsg(&usart2Comm, 'D');
+			writeMsg(&usart2Comm, 'O');
+
 			sendMsg = 0;
 		}
 	}
@@ -95,14 +105,14 @@ void initSystem(void){
 	handlerPinRx.GPIO_PinConfig.GPIO_PinAltFunMode 		= AF7;
 	GPIO_Config(&handlerPinRx);
 
-	usart2Comm.ptrUSARTx									= USART2;
-	usart2Comm.USART_Config.USART_baudrate					= USART_BAUDRATE_115200;
-	usart2Comm.USART_Config.USART_datasize					= USART_DATASIZE_8BIT;
-	usart2Comm.USART_Config.USART_parity					= USART_PARITY_NONE;
-	usart2Comm.USART_Config.USART_mode						= USART_MODE_RXTX;
-	usart2Comm.USART_Config.USART_stopbits					= USART_STOPBIT_1;
-	usart2Comm.USART_Config.USART_enableIntRX				= USART_RX_INTERRUPT_DISABLE;
-	usart2Comm.USART_Config.USART_enableIntTX				= USART_TX_INTERRUPT_DISABLE;
+	usart2Comm.ptrUSARTx								= USART2;
+	usart2Comm.USART_Config.USART_baudrate				= USART_BAUDRATE_115200;
+	usart2Comm.USART_Config.USART_datasize				= USART_DATASIZE_8BIT;
+	usart2Comm.USART_Config.USART_parity				= USART_PARITY_NONE;
+	usart2Comm.USART_Config.USART_mode					= USART_MODE_RXTX;
+	usart2Comm.USART_Config.USART_stopbits				= USART_STOPBIT_1;
+	usart2Comm.USART_Config.USART_enableIntRX			= USART_RX_INTERRUPT_DISABLE;
+	usart2Comm.USART_Config.USART_enableIntTX			= USART_TX_INTERRUPT_DISABLE;
 	USART_Config(&usart2Comm);
 
 }
