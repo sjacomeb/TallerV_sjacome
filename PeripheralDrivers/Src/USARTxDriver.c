@@ -249,6 +249,8 @@ void USART6_IRQHandler(void){
 	}
 }
 
+
+
 __attribute__((weak)) void usart1Rx_Callback(void){
 
 	__NOP();
