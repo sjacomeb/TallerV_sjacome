@@ -1,6 +1,4 @@
 /*
- * mainTarea_3.c
- *
  *  Created on: Apr 8, 2023
  *      Author: sjacome
  */
@@ -8,19 +6,22 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <math.h>
+
 #include "stm32f4xx.h"
 #include "GPIOxDriver.h"
 #include "BasicTimer.h"
 #include "ExtiDriver.h"
+#include "USARTxDriver.h"
 
 // Definición de los handlers necesarios
 
 GPIO_Handler_t 	handlerUserButton 			= {0};
 GPIO_Handler_t 	handlerBlinkyPin 			= {0};
 
-BasicTimer_Handler_t handlerBlinkyTimer = {0};
+BasicTimer_Handler_t handlerBlinkyTimer 	= {0};
 
-EXTI_Config_t ExtiButton = {0};
+EXTI_Config_t ExtiButton 					= {0};
 
 //Definición de las cabeceras de las funciones del main
 void initSystem(void);
@@ -40,7 +41,7 @@ int main(void){
 
 void initSystem(void){
 
-	/* Configuración del Led_Blinky */
+	/* Configuración del pin para el Led_Blinky */
 	handlerBlinkyPin.pGPIOx 								= GPIOA;
 	handlerBlinkyPin.GPIO_PinConfig.GPIO_PinNumber 			= PIN_5;
 	handlerBlinkyPin.GPIO_PinConfig.GPIO_PinMode 			= GPIO_MODE_OUT;
