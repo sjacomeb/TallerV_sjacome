@@ -34,10 +34,10 @@ void USART_Config(USART_Handler_t *ptrUsartHandler){
 	else if(ptrUsartHandler->ptrUSARTx == USART6){
 			RCC->APB2ENR &=~ RCC_APB2ENR_USART6EN;
 			RCC->APB2ENR |= RCC_APB2ENR_USART6EN;
-		}
-		else{
-			__NOP();
-		}
+	}
+	else{
+		__NOP();
+	}
 
 	/* 2. Configuramos el tamaño del dato, la paridad y los bit de parada */
 	/* En el CR1 estan parity (PCE y PS) y tamaño del dato (M) */
@@ -54,7 +54,7 @@ void USART_Config(USART_Handler_t *ptrUsartHandler){
 	// Verificamos si el parity esta activado o no
     // Tenga cuidado, el parity hace parte del tamaño de los datos...
 	if(ptrUsartHandler->USART_Config.USART_parity != USART_PARITY_NONE){
-		ptrUsartHandler->ptrUSARTx->CR1 |= (USART_CR1_PCE);
+		ptrUsartHandler->ptrUSARTx->CR1 |= USART_CR1_PCE;
 		// Verificamos si se ha seleccionado ODD or EVEN
 		if(ptrUsartHandler->USART_Config.USART_parity == USART_PARITY_EVEN){
 			// Es even, entonces cargamos la configuracion adecuada

@@ -36,23 +36,27 @@ void initSystem(void);
 int main(void){
 
 	//Inicializamos todos los elementos del sistema
-	initSystem();
+	 initSystem();
 
 	while(1){
 
-		if(printMsg > 4){
+//		if(sendMsg > 4){
+//
+//			writeChar(&usart2Comm, 'H');
+//			writeChar(&usart2Comm, 'O');
+//			writeChar(&usart2Comm, 'L');
+//			writeChar(&usart2Comm, 'A');
+//			writeChar(&usart2Comm, ' ');
+//			writeChar(&usart2Comm, 'M');
+//			writeChar(&usart2Comm, 'U');
+//			writeChar(&usart2Comm, 'N');
+//			writeChar(&usart2Comm, 'D');
+//			writeChar(&usart2Comm, 'O');
+//			sendMsg = 0;
+//		}
 
-			writeMsg(&usart2Comm, 'H');
-			writeMsg(&usart2Comm, 'O');
-			writeMsg(&usart2Comm, 'L');
-			writeMsg(&usart2Comm, 'A');
-			writeMsg(&usart2Comm, ' ');
-			writeMsg(&usart2Comm, 'M');
-			writeMsg(&usart2Comm, 'U');
-			writeMsg(&usart2Comm, 'N');
-			writeMsg(&usart2Comm, 'D');
-			writeMsg(&usart2Comm, 'O');
-
+		if(sendMsg == 4){
+			writeMsg(&usart2Comm, "Hola Mundo");
 			sendMsg = 0;
 		}
 	}
