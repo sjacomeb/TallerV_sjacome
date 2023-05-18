@@ -13,20 +13,20 @@ void pwm_Config(PWM_Handler_t *ptrPwmHandler){
 
 	/* 1. Activar la señal de reloj del periférico requerido */
 	if(ptrPwmHandler->ptrTIMx == TIM2){
-		RCC->APB1ENR &=~ RCC_APB1ENR_PWREN;
-		RCC->APB1ENR |= RCC_APB1ENR_PWREN;
+		RCC->APB1ENR &=~ RCC_APB1ENR_TIM2EN;
+		RCC->APB1ENR |= RCC_APB1ENR_TIM2EN;
 	}
 	else if(ptrPwmHandler->ptrTIMx == TIM3){
-		RCC->APB1ENR &=~ RCC_APB1ENR_PWREN;
-		RCC->APB1ENR |= RCC_APB1ENR_PWREN;
+		RCC ->APB1ENR &=~ RCC_APB1ENR_TIM3EN;
+		RCC ->APB1ENR |= RCC_APB1ENR_TIM3EN;
 	}
 	else if(ptrPwmHandler->ptrTIMx == TIM4){
-		RCC->APB1ENR &=~ RCC_APB1ENR_PWREN;
-		RCC->APB1ENR |= RCC_APB1ENR_PWREN;
+		RCC->APB1ENR &=~ RCC_APB1ENR_TIM4EN;
+		RCC->APB1ENR |= RCC_APB1ENR_TIM4EN;
 	}
 	else if(ptrPwmHandler->ptrTIMx == TIM5){
-		RCC->APB1ENR &=~ RCC_APB1ENR_PWREN;
-		RCC->APB1ENR |= RCC_APB1ENR_PWREN;
+		RCC->APB1ENR &=~ RCC_APB1ENR_TIM5EN;
+		RCC->APB1ENR |= RCC_APB1ENR_TIM5EN;
 	}
 	else{
 		__NOP();
@@ -56,8 +56,8 @@ void pwm_Config(PWM_Handler_t *ptrPwmHandler){
 
 		// Configuramos el canal como PWM
 		//PMW mode 1 (110)
+		ptrPwmHandler->ptrTIMx->CCMR1 |= TIM_CCMR1_OC2M;  // Uno en las demas posiciones
 		ptrPwmHandler->ptrTIMx->CCMR1 &= ~(TIM_CCMR1_OC1M_0);  //Cero en la posicion cero
-		ptrPwmHandler->ptrTIMx->CCMR1 |= TIM_CCMR1_OC1M;  // Uno en las demas posiciones
 
 		// Activamos la funcionalidad de pre-load
 		ptrPwmHandler->ptrTIMx->CCMR1 |= TIM_CCMR1_OC1PE;
@@ -71,8 +71,9 @@ void pwm_Config(PWM_Handler_t *ptrPwmHandler){
 
 		// Configuramos el canal como PWM
 		//PMW mode 1 (110)
-		ptrPwmHandler->ptrTIMx->CCMR1 &= ~(TIM_CCMR1_OC2M_0);  //Cero en la posicion cero
 		ptrPwmHandler->ptrTIMx->CCMR1 |= TIM_CCMR1_OC2M;  // Uno en las demas posiciones
+		ptrPwmHandler->ptrTIMx->CCMR1 &= ~(TIM_CCMR1_OC2M_0);  //Cero en la posicion cero
+
 
 		// Activamos la funcionalidad de pre-load
 		ptrPwmHandler->ptrTIMx->CCMR1 |= TIM_CCMR1_OC2PE;

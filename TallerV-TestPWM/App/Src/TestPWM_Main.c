@@ -14,6 +14,7 @@
 #include "BasicTimer.h"
 #include "ExtiDriver.h"
 #include "USARTxDriver.h"
+#include "PwmDriver.h"
 
 #include "arm_math.h"
 
@@ -30,16 +31,14 @@ GPIO_Handler_t handlerPinRX     = {0};
 USART_Handler_t usart2Comm      = {0};
 uint8_t sendMsg = 0;
 uint8_t usart2DataReceived = 0;
+
 char bufferMsg[64] = {0};
 
-/* Arreglos para pruebas con librerias de CMSIS*/
-float32_t srcNumber[4] = {-0.987, 32.26, -45.21, -987.321};
-float32_t destNumber[4] = {0};
-uint32_t dataSize = 0;
+/* Elementos para el PWM*/
+GPIO_Handler_t handlerPinPwmChannel   = {0};
+PWM_Handler_t handlerSignalPWM        = {0};
 
-/* Para utilizar la funcion seno */
-float32_t sineValue = 0.0;
-float32_t sineArgValue = 0.0;
+uint16_t duttyValue = 1500;
 
 //Definición de las cabeceras de las funciones del main
 void initSystem(void);
@@ -55,39 +54,30 @@ int main(void){
 
 	while(1){
 
-		/* Realiza operacion de punto flotante cuando se escribe
-		 * algun caracter por el puerto serial
+		/* Verificando el PWM
 		 * */
-		if(usart2DataReceived == 'A'){
+		if(usart2DataReceived != '\0'){
 
-			dataSize = 4;
+			if(usart2DataReceived == 'D'){
 
-			/* Ejecutando la funcion para obtener el valor absoluto */
-			arm_abs_f32(srcNumber, destNumber, dataSize);
-
-			for(int j = 0; j<4; j++){
-
-				sprintf(bufferMsg, "Valor absoluto de %#.2f = %#.2f \n ", srcNumber[j], destNumber[j]);
-				writeMsg(&usart2Comm, bufferMsg);
-
+				//Down
+				duttyValue -=1000;
+				updateDuttyCycle(&handlerSignalPWM, duttyValue);
 			}
 
-			usart2DataReceived = '\0';
-		}
+			if(usart2DataReceived == 'U'){
 
-		/* Para probar el seno */
-		if(usart2DataReceived == 'B'){
+				//Up
+				duttyValue +=1000;
+				updateDuttyCycle(&handlerSignalPWM, duttyValue);
+			}
 
-			sineArgValue = M_PI/4;
-
-			//La funcion recibe un valor en radianes
-
-			sineValue = arm_sin_f32(sineArgValue);
-			sprintf(bufferMsg, "Seno(%#.2f) = %#.6f \n ", sineArgValue, sineValue);
+			/* Imprimimos el mensaje */
+			sprintf(bufferMsg, " dutty = %u \n ", (unsigned int)duttyValue);
 			writeMsg(&usart2Comm, bufferMsg);
 
+			/* Cambiamos el estado del elemento que controla la entrada*/
 			usart2DataReceived = '\0';
-
 		}
 
 	}
@@ -150,6 +140,32 @@ void initSystem(void){
 	usart2Comm.USART_Config.USART_enableIntTX				= USART_TX_INTERRUPT_DISABLE;
 
 	USART_Config(&usart2Comm);
+
+	/* Configuramos el PWM*/
+	handlerPinPwmChannel.pGPIOx                             = GPIOC;
+	handlerPinPwmChannel.GPIO_PinConfig.GPIO_PinNumber		= PIN_7;
+	handlerPinPwmChannel.GPIO_PinConfig.GPIO_PinMode		= GPIO_MODE_ALTFN;
+	handlerPinPwmChannel.GPIO_PinConfig.GPIO_PinOType		= GPIO_OTYPE_PUSHPULL;
+	handlerPinPwmChannel.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
+	handlerPinPwmChannel.GPIO_PinConfig.GPIO_PinSpeed		= GPIO_OSPEED_FAST;
+	handlerPinPwmChannel.GPIO_PinConfig.GPIO_PinAltFunMode	= AF2;
+
+	/* Cargamos la configuracion en los registros del MCU*/
+	GPIO_Config(&handlerPinPwmChannel);
+
+	/* Configurando el Timer para que genere la señal PWM*/
+	handlerSignalPWM.ptrTIMx								= TIM3;
+	handlerSignalPWM.config.channel							= PWM_CHANNEL_2;
+	handlerSignalPWM.config.duttyCicle						= duttyValue;
+	handlerSignalPWM.config.periodo							= 20000;
+	handlerSignalPWM.config.prescaler						= 16;
+
+	/* Cargamos la configuracion en los registros del MCU */
+	pwm_Config(&handlerSignalPWM);
+
+	/* Activamos la señal */
+	enableOutput(&handlerSignalPWM);
+	startPwmSignal(&handlerSignalPWM);
 }
 
 void BasicTimer2_Callback(void){
