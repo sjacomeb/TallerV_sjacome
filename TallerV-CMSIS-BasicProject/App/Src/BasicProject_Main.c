@@ -13,6 +13,8 @@
 #include "BasicTimer.h"
 #include "ExtiDriver.h"
 #include "USARTxDriver.h"
+#include "PwmDriver.h"
+
 
 // Definición de los handlers necesarios
 
