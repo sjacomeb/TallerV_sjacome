@@ -59,6 +59,7 @@ int main(void){
 			writeMsg(&usart2Comm, "Hola Mundo");
 			sendMsg = 0;
 		}
+
 	}
 
 	return 0;

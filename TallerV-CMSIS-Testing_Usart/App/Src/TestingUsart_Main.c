@@ -29,6 +29,7 @@ GPIO_Handler_t handlerPinRX     = {0};
 USART_Handler_t usart2Comm      = {0};
 uint8_t sendMsg = 0;
 uint8_t usart2DataReceived = 0;
+
 char mensaje[] = "\nPrueba de sonido\n"; //Arreglo sin tamaño (toma el tamaño del mensaje escrito)
 char bufferMsg[64] = {0};
 
@@ -42,19 +43,19 @@ int main(void){
 
 	while(1){
 
-		/*Ejemplo de interrupcion*/
-		if(sendMsg >4){
-
-			sprintf(bufferMsg, "Valor de PI = %#.3f \n" , M_PI);
-			writeMsg(&usart2Comm, bufferMsg);
-
-			sendMsg = 0;
-		}
+//		/*Ejemplo de interrupcion*/
+//		if(sendMsg >4){
+//
+//			sprintf(bufferMsg, "Valor de PI = %#.3f \n" , M_PI);
+//			//writeMsg(&usart2Comm, bufferMsg);
+//
+//			sendMsg = 0;
+//		}
 
 //		if(usart2DataReceived != '\0'){
 //			/* Echo, envia de vuelta lo que recibe*/
 //			writeChar(&usart2Comm, usart2DataReceived);
-//
+
 //			/* Creando un mensaje con el caracter recibido */
 //			sprintf(bufferMsg, "Recibido Char = %c \n" , usart2DataReceived);
 //			writeMsg(&usart2Comm, bufferMsg);
@@ -62,27 +63,28 @@ int main(void){
 //			usart2DataReceived = '\0';
 //		}
 
-//		/*Ejemplo de arreglo*/
-//		if(sendMsg >4){
-//			//writeChar(&usart2Comm, 'G');
-//
-//			writeMsg(&usart2Comm, mensaje);
-//
-//			//Crea el string y lo almacena en el arreglo bufferMsg
-//			sprintf(bufferMsg, "valor de sendMsg = %X \n", sendMsg);
-//			//valor de sendMsg = C \n
-//
-//			sprintf(bufferMsg, "Valor de PI = %f \n", M_PI);
-//			writeMsg(&usart2Comm, bufferMsg);
-//
-//			sprintf(bufferMsg, "Valor de PI = %#.3f \n", M_PI);
-//			writeMsg(&usart2Comm, bufferMsg);
-//
-//			sprintf(bufferMsg, "Valor de PI = %f, sendMsg = %d \n", M_PI, sendMsg);
-//			writeMsg(&usart2Comm, bufferMsg);
-//
-//			sendMsg = 0;
-//		}
+		/*Ejemplo de arreglo*/
+		if(sendMsg > 11){
+			//writeChar(&usart2Comm, 'G');
+
+			writeMsg(&usart2Comm, mensaje);
+
+			//Crea el string y lo almacena en el arreglo bufferMsg
+			sprintf(bufferMsg, "valor de sendMsg = %X \n", sendMsg);
+			//valor de sendMsg = C \n
+			writeMsg(&usart2Comm, bufferMsg);
+
+			sprintf(bufferMsg, "Valor de PI = %f \n", M_PI);
+			writeMsg(&usart2Comm, bufferMsg);
+
+			sprintf(bufferMsg, "Valor de PI = %#.3f \n", M_PI);
+			writeMsg(&usart2Comm, bufferMsg);
+
+			sprintf(bufferMsg, "Valor de PI = %f, sendMsg = %d \n", M_PI, sendMsg);
+			writeMsg(&usart2Comm, bufferMsg);
+
+			sendMsg = 0;
+		}
 	}
 
 	return 0;
@@ -159,4 +161,5 @@ void callback_extInt13(void){
 void usart2Rx_Callback(void){
 
 	usart2DataReceived = getRxData();
+
 }
