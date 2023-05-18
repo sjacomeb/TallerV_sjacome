@@ -70,7 +70,6 @@ void BasicTimer_Config(BasicTimer_Handler_t *ptrBTimerHandler){
 	 * periodo_incremento * veces_incremento_counter = periodo_update
 	 * Modificar el valor del registro PSC en el TIM utilizado
 	 */
-	/* Escriba codigo aca */
 
 	ptrBTimerHandler->ptrTIMx->PSC = ptrBTimerHandler->TIMx_Config.TIMx_speed;
 	/* 3. Configuramos la dirección del counter (up/down)*/
@@ -78,26 +77,22 @@ void BasicTimer_Config(BasicTimer_Handler_t *ptrBTimerHandler){
 
 		/* 3a. Estamos en UP_Mode, el limite se carga en ARR y se comienza en 0 */
 		// Configurar el registro que nos controla el modo up or down
-		/* Escriba codigo aca */
 		ptrBTimerHandler->ptrTIMx ->CR1 &= ~(TIM_CR1_DIR);
 
 		/* 3b. Configuramos el Auto-reload. Este es el "limite" hasta donde el CNT va a contar */
 		ptrBTimerHandler->ptrTIMx->ARR = ptrBTimerHandler->TIMx_Config.TIMx_period - 1;
 
 		/* 3c. Reiniciamos el registro counter*/
-		/* Escriba codigo aca */
 		ptrBTimerHandler ->ptrTIMx ->CNT = 0;
 
 	}else{
 		/* 3a. Estamos en DOWN_Mode, el limite se carga en ARR (0) y se comienza en un valor alto
 		 * Trabaja contando en direccion descendente*/
-		/* Escriba codigo aca */
 		ptrBTimerHandler->ptrTIMx ->CR1 |= TIM_CR1_DIR;
 
 
 		/* 3b. Configuramos el Auto-reload. Este es el "limite" hasta donde el CNT va a contar
 		 * En modo descendente, con numero positivos, cual es el minimi valor al que ARR puede llegar*/
-		/* Escriba codigo aca */
 		ptrBTimerHandler->ptrTIMx->ARR = 0;
 
 		/* 3c. Reiniciamos el registro counter
@@ -110,7 +105,6 @@ void BasicTimer_Config(BasicTimer_Handler_t *ptrBTimerHandler){
 
 	/* 5. Activamos la interrupción debida al Timerx Utilizado
 	 * Modificar el registro encargado de activar la interrupcion generada por el TIMx*/
-	/* Escriba codigo aca */
 
 	//Primero habilitar el UIE
 	ptrBTimerHandler ->ptrTIMx ->DIER |= SET;
@@ -122,17 +116,14 @@ void BasicTimer_Config(BasicTimer_Handler_t *ptrBTimerHandler){
 	}
 	else if(ptrBTimerHandler->ptrTIMx == TIM3){
 		// Activando en NVIC para la interrupción del TIM3
-		/* Escriba codigo aca */
 		NVIC_EnableIRQ(TIM3_IRQn);
 	}
 	else if (ptrBTimerHandler->ptrTIMx == TIM4){
 		// Activando en NVIC para la interrupción del TIM4
-		/* Escriba codigo aca */
 		NVIC_EnableIRQ(TIM4_IRQn);
 	}
 	else if(ptrBTimerHandler->ptrTIMx == TIM5){
 		// Activando en NVIC para la interrupción del TIM5
-		/* Escriba codigo aca */
 		NVIC_EnableIRQ(TIM5_IRQn);
 	}
 	else{

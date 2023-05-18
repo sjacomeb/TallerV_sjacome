@@ -32,8 +32,8 @@ void USART_Config(USART_Handler_t *ptrUsartHandler){
 	}
     /* 1.3 Configuramos el USART6 */
 	else if(ptrUsartHandler->ptrUSARTx == USART6){
-			RCC->APB2ENR &=~ RCC_APB2ENR_USART6EN;
-			RCC->APB2ENR |= RCC_APB2ENR_USART6EN;
+		RCC->APB2ENR &=~ RCC_APB2ENR_USART6EN;
+		RCC->APB2ENR |= RCC_APB2ENR_USART6EN;
 	}
 	else{
 		__NOP();
