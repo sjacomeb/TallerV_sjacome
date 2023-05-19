@@ -14,7 +14,11 @@
 #include "ExtiDriver.h"
 #include "USARTxDriver.h"
 #include "PwmDriver.h"
+#include "SysTickDriver.h"
 
+#define HSI_CLOCK_CONFIGURED    0  //16MHz
+#define HSE_CLOCK_CONFIGURED    1
+#define PLL_CLOCK_CONFIGURED    2
 
 // Definición de los handlers necesarios
 
@@ -40,6 +44,9 @@ int main(void){
 	//Inicializamos todos los elementos del sistema
 	 initSystem();
 
+	 //Se configura a 16MHz
+	 config_SysTick_ms(HSI_CLOCK_CONFIGURED);
+
 	while(1){
 
 //		if(sendMsg > 4){
@@ -57,8 +64,38 @@ int main(void){
 //			sendMsg = 0;
 //		}
 
-		if(sendMsg == 4){
+		/* Pruebas al SysTick*/
+		if(sendMsg > 4){
+
 			writeMsg(&usart2Comm, "Hola Mundo");
+
+			GPIOxTooglePin(&handlerBlinkyPin);
+			delay_ms(300);
+			GPIOxTooglePin(&handlerBlinkyPin);
+			delay_ms(300);
+			GPIOxTooglePin(&handlerBlinkyPin);
+			delay_ms(300);
+			GPIOxTooglePin(&handlerBlinkyPin);
+			delay_ms(300);
+
+			GPIOxTooglePin(&handlerBlinkyPin);
+			delay_ms(250);
+			GPIOxTooglePin(&handlerBlinkyPin);
+			delay_ms(250);
+			GPIOxTooglePin(&handlerBlinkyPin);
+			delay_ms(250);
+			GPIOxTooglePin(&handlerBlinkyPin);
+			delay_ms(250);
+
+			GPIOxTooglePin(&handlerBlinkyPin);
+			delay_ms(185);
+			GPIOxTooglePin(&handlerBlinkyPin);
+			delay_ms(185);
+			GPIOxTooglePin(&handlerBlinkyPin);
+			delay_ms(185);
+			GPIOxTooglePin(&handlerBlinkyPin);
+			delay_ms(185);
+
 			sendMsg = 0;
 		}
 
@@ -125,7 +162,7 @@ void initSystem(void){
 }
 
 void BasicTimer2_Callback(void){
-	GPIOxTooglePin(&handlerBlinkyPin);
+//	GPIOxTooglePin(&handlerBlinkyPin);
 	sendMsg++;
 }
 
