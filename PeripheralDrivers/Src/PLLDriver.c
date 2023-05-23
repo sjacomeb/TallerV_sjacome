@@ -8,54 +8,92 @@
 #include <stm32f4xx.h>
 #include "PLLDriver.h"
 
-void Pll_Config(void){
-	/***********************Increasing the CPU frequency******************/
-	/* 1) Program the new number of wait states to the LATENCY bits in the FLASH_ACR register */
-	//LATENCY: These bits represent the ratio of the CPU clock period to the Flash memory access time.
+//Función para cargar la configuración de los registros
+void configPLL(void){
 
-	//3WS (4 CPU cycles) -> 90 < HCLK ≤ 100 -> Voltage range 2.7 V - 3.6 V
+	//Activamos la señal de reloj del Power Control
+	RCC->APB1ENR |= RCC_APB1ENR_PWREN;
 
-	FLASH->ACR &= ~(FLASH_ACR_LATENCY);
-	FLASH->ACR |= (FLASH_ACR_LATENCY_3WS);
+//	//Para trabajar con velocidades >= 84 MHz y <= 100MHz
+//	PWR->CR &= ~(PWR_CR_VOS);
+//	PWR->CR |= (PWR_CR_VOS);
 
-	/* 2) Check that the new number of wait states is taken into account to access the Flash memory
-          by reading the FLASH_ACR register*/
+	//Wait states to the Latency
+	FLASH->ACR |= FLASH_ACR_ICEN | FLASH_ACR_DCEN | FLASH_ACR_PRFTEN ;
+	FLASH->ACR  &= ~(FLASH_ACR_LATENCY);
+	FLASH->ACR |= (FLASH_ACR_LATENCY_2WS); //64 < HCLK ≤ 90
 
-	/* 3) Modify the CPU clock source by writing the SW bits in the RCC_CFGR register*/
+	/* Modify the CPU clock */
+	//SW : System clock switch
+	RCC -> CFGR &= ~(RCC_CFGR_SW);
+	RCC->CFGR |= RCC_CFGR_SW_1;   // PLL selected as system clock
 
-	RCC->CFGR |= RCC_CFGR_SWS_1;
+	RCC->PLLCFGR &= ~(RCC_PLLCFGR_PLLSRC); // HSI clock selected as PLL clock entry
 
-	//Se configura el valor que queremos obtener, es decir 100MHz
+	//Se configura el valor que queremos obtener
 	//f(VCO clock) = 16 MHz * (PLLN/PLLM)
-	//Empezamos con el factor de multiplicación PLLN=100MHz
-	RCC->PLLCFGR &= ~(RCC_PLLCFGR_PLLN);
-	RCC->PLLCFGR |= (0x64 << RCC_PLLCFGR_PLLN_Pos);
 
-	//Luego se configura el factor de  división PLLM = 2MHz
+	// PLLN = 60 MHz
+	RCC->PLLCFGR &= ~(RCC_PLLCFGR_PLLN);
+	RCC->PLLCFGR |= (0x3C << RCC_PLLCFGR_PLLN_Pos);
+
+	// PLLM = 2 MHz
 	RCC->PLLCFGR &= ~(RCC_PLLCFGR_PLLM);
-	RCC->PLLCFGR |= (RCC_PLLCFGR_PLLM_2);
+	RCC->PLLCFGR |= (RCC_PLLCFGR_PLLM_1);
 
 	//f(Clock output) = f(VCO clock) / PLLP
-	//Como la frecuencia deseada es 100MHz, el PLLP = 8 MHz
+	//La frecuencia deseada es 80 MHz, entonces PLLP = 6 MHz
 	RCC->PLLCFGR &= ~(RCC_PLLCFGR_PLLP);
-	RCC->PLLCFGR |= (0x3 << RCC_PLLCFGR_PLLP_Pos);
+	RCC->PLLCFGR |= (RCC_PLLCFGR_PLLP_0);
 
-	/* 4) If needed, modify the CPU clock prescaler by writing the HPRE bits in RCC_CFGR*/
-	//Se pone en 0 ya que no se desea hacer ninguna división
+	/* División de los buses */
+	//AHB prescaler, no se divide (trabaja a 100MHz > 80 MHz)
 	RCC->CFGR &= ~(RCC_CFGR_HPRE);
+	RCC->CFGR |= (RCC_CFGR_HPRE_DIV1);
 
-	/* 5) Check that the new CPU clock source or/and the new CPU clock prescaler value is/are
-       taken into account by reading the clock source status (SWS bits) or/and the AHB
-       prescaler value (HPRE bits), respectively, in the RCC_CFGR register. */
-	// El APB1 no puede superar los 50 MHz por lo tanto se debe dividir en 2
+	//APB1 prescaler, se divide por 2, ya que trabaja a 50 MHz
 	RCC->CFGR &= ~(RCC_CFGR_PPRE1);
 	RCC->CFGR |= (RCC_CFGR_PPRE1_DIV2);
 
-	// El APB2 no puede superar los 100 MHz por lo tanto no se divide por ningun factor
+	//APB2 prescaler, no se divide (trabaja a 100MHz > 80 MHz)
 	RCC->CFGR &= ~(RCC_CFGR_PPRE2);
 	RCC->CFGR |= (RCC_CFGR_PPRE2_DIV1);
 
-	/*Finalmente se activa el PLL*/
+	// Seleccionamos la señal PLL
+	RCC -> CFGR |= RCC_CFGR_MCO1;
+
+	//Division de 5 (preescaler)
+	RCC ->CFGR &= RCC_CFGR_MCO1PRE;
+	RCC -> CFGR |= RCC_CFGR_MCO1_1;
+
+	/*Se enciende el PLL*/
 	RCC->CR |= RCC_CR_PLLON;
+
+	// Esperamos que el PLL se cierre (estabilizacion)
+	while (!(RCC->CR & RCC_CR_PLLRDY)){
+		__NOP();
+	}
+
 }
 
+//Función que entrega la frecuencia
+uint32_t getConfigPLL(uint32_t freqClock){
+
+	freqClock = 0;
+
+	uint32_t valuePlln = ((RCC_PLLCFGR_PLLN & RCC_PLLCFGR_PLLN_Msk) >> RCC_PLLCFGR_PLLN_Pos);
+	uint32_t valuePllm = ((RCC_PLLCFGR_PLLM & RCC_PLLCFGR_PLLM_Msk) >> RCC_PLLCFGR_PLLM_Pos);
+
+	if( freqClock == 16 ){
+
+		freqClock = HSI_VALUE ;
+
+	}
+	else{
+
+		freqClock = ((HSE_VALUE * valuePlln) / valuePllm) / 2 ;		//valuePLLP = 2
+	}
+
+	return freqClock ;
+
+}

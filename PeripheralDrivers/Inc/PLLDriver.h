@@ -10,8 +10,11 @@
 
 #include <stm32f4xx.h>
 
-//Función para cargar la configuración de los registros
-void PLL_Config(void);
+#define HSI_VALUE   10000000	//10MHz
+#define HSE_VALUE	80000000    //80 MHz
+
+void configPLL(void);
+uint32_t getConfigPLL(uint32_t freqClock);
 
 
 #endif /* PLLDRIVER_H_ */
