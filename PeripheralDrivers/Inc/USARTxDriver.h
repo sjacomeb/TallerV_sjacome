@@ -82,6 +82,7 @@ void USART_Config(USART_Handler_t *ptrUsartHandler);
 int writeChar(USART_Handler_t *ptrUsartHandler, char dataToSend); //Envia un caracter
 void writeMsg(USART_Handler_t *ptrUsartHandler, char *msgToSend); //Lee la primera posición del arreglo
 
+
 uint8_t getRxData(void);
 
 void usart1Rx_Callback(void);
