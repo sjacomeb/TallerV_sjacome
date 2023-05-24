@@ -15,7 +15,6 @@
 #include "USARTxDriver.h"
 #include "PwmDriver.h"
 #include "SysTickDriver.h"
-#include "PLLDriver.h"
 
 #define HSI_CLOCK_CONFIGURED    0  //16MHz
 #define HSE_CLOCK_CONFIGURED    1
@@ -45,62 +44,48 @@ int main(void){
 	//Inicializamos todos los elementos del sistema
 	 initSystem();
 
-	 //Se configura a 16MHz
-	 config_SysTick_ms(HSI_CLOCK_CONFIGURED);
+//	 //Se configura a 16MHz
+//	 config_SysTick_ms(HSI_CLOCK_CONFIGURED);
 
 	while(1){
 
+
+//		/* Pruebas al SysTick*/
 //		if(sendMsg > 4){
 //
-//			writeChar(&usart2Comm, 'H');
-//			writeChar(&usart2Comm, 'O');
-//			writeChar(&usart2Comm, 'L');
-//			writeChar(&usart2Comm, 'A');
-//			writeChar(&usart2Comm, ' ');
-//			writeChar(&usart2Comm, 'M');
-//			writeChar(&usart2Comm, 'U');
-//			writeChar(&usart2Comm, 'N');
-//			writeChar(&usart2Comm, 'D');
-//			writeChar(&usart2Comm, 'O');
+//			writeMsg(&usart2Comm, "Hola Mundo");
+//
+//			GPIOxTooglePin(&handlerBlinkyPin);
+//			delay_ms(300);
+//			GPIOxTooglePin(&handlerBlinkyPin);
+//			delay_ms(300);
+//			GPIOxTooglePin(&handlerBlinkyPin);
+//			delay_ms(300);
+//			GPIOxTooglePin(&handlerBlinkyPin);
+//			delay_ms(300);
+//
+//			GPIOxTooglePin(&handlerBlinkyPin);
+//			delay_ms(250);
+//			GPIOxTooglePin(&handlerBlinkyPin);
+//			delay_ms(250);
+//			GPIOxTooglePin(&handlerBlinkyPin);
+//			delay_ms(250);
+//			GPIOxTooglePin(&handlerBlinkyPin);
+//			delay_ms(250);
+//
+//			GPIOxTooglePin(&handlerBlinkyPin);
+//			delay_ms(185);
+//			GPIOxTooglePin(&handlerBlinkyPin);
+//			delay_ms(185);
+//			GPIOxTooglePin(&handlerBlinkyPin);
+//			delay_ms(185);
+//			GPIOxTooglePin(&handlerBlinkyPin);
+//			delay_ms(185);
+//
 //			sendMsg = 0;
 //		}
-
-		/* Pruebas al SysTick*/
-		if(sendMsg > 4){
-
-			writeMsg(&usart2Comm, "Hola Mundo");
-
-			GPIOxTooglePin(&handlerBlinkyPin);
-			delay_ms(300);
-			GPIOxTooglePin(&handlerBlinkyPin);
-			delay_ms(300);
-			GPIOxTooglePin(&handlerBlinkyPin);
-			delay_ms(300);
-			GPIOxTooglePin(&handlerBlinkyPin);
-			delay_ms(300);
-
-			GPIOxTooglePin(&handlerBlinkyPin);
-			delay_ms(250);
-			GPIOxTooglePin(&handlerBlinkyPin);
-			delay_ms(250);
-			GPIOxTooglePin(&handlerBlinkyPin);
-			delay_ms(250);
-			GPIOxTooglePin(&handlerBlinkyPin);
-			delay_ms(250);
-
-			GPIOxTooglePin(&handlerBlinkyPin);
-			delay_ms(185);
-			GPIOxTooglePin(&handlerBlinkyPin);
-			delay_ms(185);
-			GPIOxTooglePin(&handlerBlinkyPin);
-			delay_ms(185);
-			GPIOxTooglePin(&handlerBlinkyPin);
-			delay_ms(185);
-
-			sendMsg = 0;
-		}
-
-
+//
+//
 	}
 
 	return 0;
@@ -152,7 +137,7 @@ void initSystem(void){
 	GPIO_Config(&handlerPinRx);
 
 	usart2Comm.ptrUSARTx								= USART2;
-	usart2Comm.USART_Config.USART_baudrate				= USART_BAUDRATE_115200;
+	usart2Comm.USART_Config.USART_baudrate				= USART_BAUDRATE_19200;
 	usart2Comm.USART_Config.USART_datasize				= USART_DATASIZE_8BIT;
 	usart2Comm.USART_Config.USART_parity				= USART_PARITY_NONE;
 	usart2Comm.USART_Config.USART_mode					= USART_MODE_RXTX;
@@ -164,7 +149,7 @@ void initSystem(void){
 }
 
 void BasicTimer2_Callback(void){
-//	GPIOxTooglePin(&handlerBlinkyPin);
+	GPIOxTooglePin(&handlerBlinkyPin);
 	sendMsg++;
 }
 
