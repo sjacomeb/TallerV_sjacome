@@ -32,6 +32,7 @@ EXTI_Config_t ExtiButton 					= {0};
 
 GPIO_Handler_t handlerPinTx					= {0};
 GPIO_Handler_t handlerPinRx					= {0};
+GPIO_Handler_t handlerPinMCO1				= {0};
 USART_Handler_t usartComm 					= {0};
 
 //Definición de las cabeceras de las funciones del main
@@ -41,6 +42,9 @@ int main(void){
 
 	//Inicializamos todos los elementos del sistema
 	 initSystem();
+
+	 configPLL();
+
 
 	while(1){
 
@@ -53,7 +57,6 @@ int main(void){
 
 void initSystem(void){
 
-	configPLL();
 
 	/* Configuración del pin para el Led_Blinky */
 	handlerBlinkyPin.pGPIOx 								= GPIOA;
@@ -67,8 +70,8 @@ void initSystem(void){
 	/* Configuración del TIM2 para controlar el blinky */
 	handlerBlinkyTimer.ptrTIMx 								= TIM2;
 	handlerBlinkyTimer.TIMx_Config.TIMx_mode				= BTIMER_MODE_UP;
-	handlerBlinkyTimer.TIMx_Config.TIMx_speed				= BTIMER_SPEED_100us;
-	handlerBlinkyTimer.TIMx_Config.TIMx_period				= 2500;					//250 ms
+	handlerBlinkyTimer.TIMx_Config.TIMx_speed				= BTIMER_SPEED_80MHz_10us;
+	handlerBlinkyTimer.TIMx_Config.TIMx_period				= 1250;					//250 ms
 	handlerBlinkyTimer.TIMx_Config.TIMx_interruptEnable 	= BTIMER_INTERRUP_ENABLE;
 	BasicTimer_Config(&handlerBlinkyTimer);
 
@@ -96,6 +99,16 @@ void initSystem(void){
 	handlerPinRx.GPIO_PinConfig.GPIO_PinMode 			= GPIO_MODE_ALTFN;
 	handlerPinRx.GPIO_PinConfig.GPIO_PinAltFunMode 		= AF7;
 	GPIO_Config(&handlerPinRx);
+
+	/* Configuración para probar el MCO1 en el analizador de señales */
+	handlerPinMCO1.pGPIOx								= GPIOA;
+	handlerPinMCO1.GPIO_PinConfig.GPIO_PinNumber		= PIN_8;
+	handlerPinMCO1.GPIO_PinConfig.GPIO_PinMode			= GPIO_MODE_ALTFN;
+	handlerPinMCO1.GPIO_PinConfig.GPIO_PinOType			= GPIO_OTYPE_PUSHPULL;
+	handlerPinMCO1.GPIO_PinConfig.GPIO_PinSpeed			= GPIO_OSPEED_FAST;
+	handlerPinMCO1.GPIO_PinConfig.GPIO_PinPuPdControl 	= GPIO_PUPDR_NOTHING;
+	handlerPinMCO1.GPIO_PinConfig.GPIO_PinAltFunMode	= AF0;
+	GPIO_Config(&handlerPinMCO1);
 
 	//USART 1
 	usartComm.ptrUSARTx									= USART1;

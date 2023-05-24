@@ -37,7 +37,7 @@ GPIO_Handler_t I2cSCL = {0};
 I2C_Handler_t Accelerometer = {0};
 uint8_t i2cBuffer = {0};
 
-#define ACCEL_ADDRESS          0b1010011;
+#define ACCEL_ADDRESS          	 0x1D
 #define ACCEL_XOUT_H             50
 #define ACCEL_XOUT_L             51
 #define ACCEL_YOUT_H             52
@@ -51,11 +51,10 @@ uint8_t i2cBuffer = {0};
 /* Definicion de prototipos de funciones */
 void initSystem(void);
 
-
-
 int main (void)
 {
 	initSystem();
+//	i2c_writeSingleRegister(&Accelerometer, POWER_CTL , 0x2D);
 
 	//Imprimir un mensaje de inicio
 	writeMsg(&CommTerminal, bufferData);
