@@ -43,25 +43,42 @@ int main(void){
 
 	while(1){
 
+		/* Prueba de usart char and string*/
+
+//		if(sendMsg > 4){
+//
+//			writeChar(&usart2Comm, 'G');
+//
+//			writeMsg(&usart2Comm, mensaje);
+//
+//			/* Crea un string y lo almacena en el arreglo bufferMsg */
+//			sprintf(bufferMsg, "valor de sendMsg = %d, \n ", sendMsg);
+//
+//			writeMsg(&usart2Comm, bufferMsg);
+//
+//			sendMsg = 0;
+//		}
+
+
 		/*Ejemplo de interrupcion*/
 		if(sendMsg >4){
 
 			sprintf(bufferMsg, "Valor de PI = %#.3f \n" , M_PI);
-			//writeMsg(&usart2Comm, bufferMsg);
+//		writeMsg(&usart2Comm, bufferMsg);
 
 			sendMsg = 0;
 		}
 
-		if(usart2DataReceived != '\0'){
-			/* Echo, envia de vuelta lo que recibe*/
-			writeChar(&usart2Comm, usart2DataReceived);
-
-			/* Creando un mensaje con el caracter recibido */
-			sprintf(bufferMsg, "Recibido Char = %c \n" , usart2DataReceived);
-			writeMsg(&usart2Comm, bufferMsg);
-
-			usart2DataReceived = '\0';
-		}
+//		if(usart2DataReceived != '\0'){
+//			/* Echo, envia de vuelta lo que recibe*/
+//			writeChar(&usart2Comm, usart2DataReceived);
+//
+//			/* Creando un mensaje con el caracter recibido */
+//			sprintf(bufferMsg, "Recibido Char = %c \n" , usart2DataReceived);
+//			writeMsg(&usart2Comm, bufferMsg);
+//
+//			usart2DataReceived = '\0';
+//		}
 
 //		/*Ejemplo de arreglo*/
 //		if(sendMsg > 11){
@@ -141,8 +158,8 @@ void initSystem(void){
 	usart2Comm.USART_Config.USART_parity					= USART_PARITY_NONE;
 	usart2Comm.USART_Config.USART_stopbits					= USART_STOPBIT_1;
 	usart2Comm.USART_Config.USART_mode						= USART_MODE_RXTX;
-	usart2Comm.USART_Config.USART_enableIntRX       		= USART_RX_INTERRUPT_ENABLE;
-	usart2Comm.USART_Config.USART_enableIntTX				= USART_TX_INTERRUPT_DISABLE;
+	usart2Comm.USART_Config.USART_enableIntRX       		= USART_RX_INTERRUPT_ENABLE; //Deshabilitados los dos veo los
+	usart2Comm.USART_Config.USART_enableIntTX				= USART_TX_INTERRUPT_DISABLE; //los datos de las funciones sin interrupciones
 
 	USART_Config(&usart2Comm);
 }
@@ -162,13 +179,13 @@ void usart2Rx_Callback(void){
 
 	usart2DataReceived = getRxData();
 
-//	/* Echo, envia lo que recibe */
+	/* Echo, envia lo que recibe */
 //	writeChar(&usart2Comm, usart2DataReceived);
-//
+
 	/* Creando un mensaje con el caracter recibido */
 	sprintf(bufferMsg, "Recibido Char = %c \n" , usart2DataReceived);
 	writeMsg(&usart2Comm, bufferMsg);
 
-	usart2DataReceived = '\0';
+//	usart2DataReceived = '\0';
 
 }
