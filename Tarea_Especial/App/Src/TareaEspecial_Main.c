@@ -71,7 +71,7 @@ void initSystem(void){
 	handlerBlinkyTimer.ptrTIMx 								= TIM2;
 	handlerBlinkyTimer.TIMx_Config.TIMx_mode				= BTIMER_MODE_UP;
 	handlerBlinkyTimer.TIMx_Config.TIMx_speed				= BTIMER_SPEED_80MHz_10us;
-	handlerBlinkyTimer.TIMx_Config.TIMx_period				= 1250;					//250 ms
+	handlerBlinkyTimer.TIMx_Config.TIMx_period				= 2500;	  //250 ms (Tiempo de subida)
 	handlerBlinkyTimer.TIMx_Config.TIMx_interruptEnable 	= BTIMER_INTERRUP_ENABLE;
 	BasicTimer_Config(&handlerBlinkyTimer);
 
@@ -83,7 +83,7 @@ void initSystem(void){
 	handlerUserButton.GPIO_PinConfig.GPIO_PinPuPdControl 	= GPIO_PUPDR_NOTHING;
 	GPIO_Config(&handlerUserButton);
 
-	ExtiButton.pGPIOHandler   = &handlerUserButton;    //Puntero a la estructura
+	ExtiButton.pGPIOHandler   = &handlerUserButton;
 	ExtiButton.edgeType = EXTERNAL_INTERRUPT_RISING_EDGE;
 	extInt_Config(&ExtiButton);
 
