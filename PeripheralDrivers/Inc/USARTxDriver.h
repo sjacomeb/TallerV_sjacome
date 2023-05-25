@@ -35,6 +35,8 @@
 #define USART_TX_INTERRUPT_ENABLE 	1
 #define USART_TX_INTERRUPT_DISABLE  0
 
+#define HSI_VALUE   16	//16 MHz
+#define HSE_VALUE	80	//80 MHz
 
 /* Estructura para la configuración de la comunicacion:
  * Velocidad (baudrate)
@@ -79,8 +81,10 @@ typedef struct
 /* Definicion de los prototipos para las funciones del USART */
 void USART_Config(USART_Handler_t *ptrUsartHandler);
 
-int writeChar(USART_Handler_t *ptrUsartHandler, char dataToSend); //Envia un caracter
-void writeMsg(USART_Handler_t *ptrUsartHandler, char *msgToSend); //Lee la primera posición del arreglo
+int writeChar(USART_Handler_t *ptrUsartHandler, char dataToSend);
+void writeMsg(USART_Handler_t *ptrUsartHandler, char *msgToSend);
+void writeCharTX(USART_Handler_t *ptrUsartHandler, char dataToSend);
+void writeMsgTX(USART_Handler_t *ptrUsartHandler, char *msgToSend);
 
 
 uint8_t getRxData(void);
