@@ -64,10 +64,9 @@ void configPLL(void){
 	while (!(RCC->CR & RCC_CR_PLLRDY)){
 		__NOP();
 	}
-
 }
 
-//Función que entrega la frecuencia
+//Función que entrega la frecuencia en MHz
 uint8_t getConfigPLL(void){
 
 	uint8_t freqClock = 0;
@@ -88,3 +87,4 @@ uint8_t getConfigPLL(void){
 	return freqClock ;
 
 }
+
