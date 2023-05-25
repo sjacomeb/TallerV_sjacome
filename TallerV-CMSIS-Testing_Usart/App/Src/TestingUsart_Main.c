@@ -186,6 +186,4 @@ void usart2Rx_Callback(void){
 	sprintf(bufferMsg, "Recibido Char = %c \n" , usart2DataReceived);
 	writeMsg(&usart2Comm, bufferMsg);
 
-//	usart2DataReceived = '\0';
-
 }
