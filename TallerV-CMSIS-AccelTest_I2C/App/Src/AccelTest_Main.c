@@ -29,7 +29,7 @@ BasicTimer_Handler_t BlinkyTimer = {0};
 USART_Handler_t CommTerminal = {0};
 
 uint8_t rxData = 0;
-char bufferData[64] = "Accel MPU-6050 testing...";
+char bufferData[64] = "Accel testing...";
 
 /* Configuración para el I2C */
 GPIO_Handler_t I2cSDA = {0};
@@ -173,7 +173,7 @@ void initSystem(void){
 	GPIO_Config(&PinRX);
 
 	CommTerminal.ptrUSARTx                             = USART2;
-	CommTerminal.USART_Config.USART_baudrate           = USART_BAUDRATE_19200;
+	CommTerminal.USART_Config.USART_baudrate           = USART_BAUDRATE_115200;
 	CommTerminal.USART_Config.USART_datasize           = USART_DATASIZE_8BIT;
 	CommTerminal.USART_Config.USART_parity             = USART_PARITY_NONE;
 	CommTerminal.USART_Config.USART_stopbits           = USART_STOPBIT_1;

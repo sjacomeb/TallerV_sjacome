@@ -8,6 +8,7 @@
 #include <stm32f4xx.h>
 #include "PLLDriver.h"
 
+/* Esta configuración es para 80 MHz */
 //Función para cargar la configuración de los registros
 void configPLL(void){
 
@@ -38,7 +39,7 @@ void configPLL(void){
 	RCC->CFGR &= ~(RCC_CFGR_HPRE);
 	RCC->CFGR |= (RCC_CFGR_HPRE_DIV1);
 
-	//APB1 prescaler, se divide por 2, ya que trabaja a 50 MHz
+	//APB1 prescaler, se divide por 2 (40 MHz), ya que trabaja a 50 MHz
 	RCC->CFGR &= ~(RCC_CFGR_PPRE1);
 	RCC->CFGR |= (RCC_CFGR_PPRE1_DIV2);
 

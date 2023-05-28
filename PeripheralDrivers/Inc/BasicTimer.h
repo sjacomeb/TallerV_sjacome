@@ -17,8 +17,8 @@
 #define BTIMER_SPEED_100us	1600
 #define BTIMER_SPEED_1ms	16000
 
-#define BTIMER_SPEED_80MHz_10us		808       //En la medición con osciloscopio, la frecuencia fue de 20,2(MHz)*4 = 80,8 MHz ;
-#define BTIMER_SPEED_80MHz_100us	8080	  //asi obtenemos mayor precisión en el periodo
+#define BTIMER_SPEED_80MHz_10us		800
+#define BTIMER_SPEED_80MHz_100us	8000
 
 #define BTIMER_INTERRUP_ENABLE    1
 #define BTIMER_INTERRUP_DISABLE   0

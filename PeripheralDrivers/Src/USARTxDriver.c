@@ -15,7 +15,6 @@
  */
 
 uint8_t auxRxData = 0;
-uint8_t frecuencia = 0;
 uint8_t tipoDato = 0;
 uint8_t cont = 0;
 char *msg = {0};
@@ -115,14 +114,14 @@ void USART_Config(USART_Handler_t *ptrUsartHandler){
 		break;
 	}
 	case USART_STOPBIT_1_5: {
-		// Debemoscargar el valor 0b11 en los dos bits de STOP
+		// Debemos cargar el valor 0b11 en los dos bits de STOP
 
 		ptrUsartHandler->ptrUSARTx->CR2 |= USART_CR2_STOP;
 
 		break;
 	}
 	default: {
-		// En el casopor defecto seleccionamos 1 bit de parada
+		// En el caso por defecto seleccionamos 1 bit de parada
 
 		break;
 	}
@@ -130,7 +129,7 @@ void USART_Config(USART_Handler_t *ptrUsartHandler){
 
 	// 2.5 Configuracion del Baudrate (SFR USART_BRR)
 
-	//Frecuencia 16 MHz
+//	//Frecuencia 16 MHz
 //	if(ptrUsartHandler->USART_Config.USART_baudrate == USART_BAUDRATE_9600){
 //		// El valor a cargar es 104.1875 -> Mantiza = 104,fraction = 0.1875
 //		// Mantiza = 104 = 0x68, fraction = 16 * 0.1875 = 3
@@ -151,6 +150,26 @@ void USART_Config(USART_Handler_t *ptrUsartHandler){
 //		// Valor a cargar 0x8B
 //		// Configurando el Baudrate generator para una velocidad de 115200bps
 //		ptrUsartHandler->ptrUSARTx->BRR = 0x8B;
+//	}
+
+//	//Frecuencia 40 MHz
+//	if(ptrUsartHandler->USART_Config.USART_baudrate == USART_BAUDRATE_9600){
+//		// El valor a cargar es 260,4167
+//		// Mantiza = 260 = 0x104, fraction = 16 * 0.4167 = 7 = 0x7
+//		// Valor a cargar 0x1047
+//		ptrUsartHandler->ptrUSARTx->BRR = 0x1047;
+//	}
+//	else if(ptrUsartHandler->USART_Config.USART_baudrate == USART_BAUDRATE_19200){
+//		// El valor a cargar es 130,2083
+//		// Mantiza = 130 = 0x82, fraction = 16 * 0.2083 = 3 = 0x3
+//		// Valor a cargar 0x823
+//		ptrUsartHandler->ptrUSARTx->BRR = 0x823;
+//	}
+//	else if(ptrUsartHandler->USART_Config.USART_baudrate == USART_BAUDRATE_115200){
+//		// El valor a cargar es 21,7014
+//		// Mantiza = 21 = 0x15, fraction = 16 * 0,7014 = 11 = 0xB
+//		// Valor a cargar 0x15B
+//		ptrUsartHandler->ptrUSARTx->BRR = 0x15B;
 //	}
 
 	//Frecuencia 80 MHz
@@ -348,7 +367,7 @@ void USART2_IRQHandler(void){
 	//Evaluamos si la interrupcion que se dio es por RX
 	if(USART2->SR & USART_SR_RXNE){
 		auxRxData = (uint8_t) USART2-> DR;
-		usart1Rx_Callback();
+		usart2Rx_Callback();
 	}
 	//Si la interrupción es TX
 	else if(USART2->SR & USART_SR_TXE){
@@ -368,10 +387,7 @@ void USART2_IRQHandler(void){
 		}
 	}
 }
-/* Handler de la interrupcion del USART
- * acá deben estar todas las interrupciones asociadas: TX, RX, PE
- *
- */
+
 void USART6_IRQHandler(void){
 	//Evaluamos si la interrupcion que se dio es por RX
 	if(USART6->SR & USART_SR_RXNE){

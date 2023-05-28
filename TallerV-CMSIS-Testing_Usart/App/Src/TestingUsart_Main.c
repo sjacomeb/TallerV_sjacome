@@ -46,7 +46,7 @@ int main(void){
 		/* Prueba de usart char and string*/
 
 //		if(sendMsg > 4){
-//
+
 //			writeChar(&usart2Comm, 'G');
 //
 //			writeMsg(&usart2Comm, mensaje);
@@ -60,11 +60,11 @@ int main(void){
 //		}
 
 
-		/*Ejemplo de interrupcion*/
+//		/*Ejemplo de interrupcion*/
 		if(sendMsg >4){
 
 			sprintf(bufferMsg, "Valor de PI = %#.3f \n" , M_PI);
-//		writeMsg(&usart2Comm, bufferMsg);
+			writeMsg(&usart2Comm, bufferMsg);
 
 			sendMsg = 0;
 		}
@@ -153,7 +153,7 @@ void initSystem(void){
 	GPIO_Config(&handlerPinRX);
 
 	usart2Comm.ptrUSARTx									= USART2;
-	usart2Comm.USART_Config.USART_baudrate					= USART_BAUDRATE_19200;
+	usart2Comm.USART_Config.USART_baudrate					= USART_BAUDRATE_115200;
 	usart2Comm.USART_Config.USART_datasize					= USART_DATASIZE_8BIT;
 	usart2Comm.USART_Config.USART_parity					= USART_PARITY_NONE;
 	usart2Comm.USART_Config.USART_stopbits					= USART_STOPBIT_1;
@@ -183,7 +183,7 @@ void usart2Rx_Callback(void){
 //	writeChar(&usart2Comm, usart2DataReceived);
 
 	/* Creando un mensaje con el caracter recibido */
-	sprintf(bufferMsg, "Recibido Char = %c \n" , usart2DataReceived);
-	writeMsg(&usart2Comm, bufferMsg);
+//	sprintf(bufferMsg, "Recibido Char = %c \n" , usart2DataReceived);
+//	writeMsg(&usart2Comm, bufferMsg);
 
 }
