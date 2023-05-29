@@ -40,8 +40,12 @@ I2C_Handler_t Accelerometer = {0};
 uint8_t i2cBuffer = {0};
 
 /* Elementos para el PWM*/
-GPIO_Handler_t handlerPinPwmChannel   = {0};
-PWM_Handler_t handlerSignalPWM        = {0};
+GPIO_Handler_t handlerPinPwmChannel1   = {0};
+GPIO_Handler_t handlerPinPwmChannel2   = {0};
+GPIO_Handler_t handlerPinPwmChannel3   = {0};
+PWM_Handler_t handlerSignal1PWM        = {0};
+PWM_Handler_t handlerSignal2PWM        = {0};
+PWM_Handler_t handlerSignal3PWM        = {0};
 
 uint16_t duttyValue = 1500;
 
@@ -54,7 +58,7 @@ uint8_t flag2seg = 0;
 uint8_t contData = 0;
 float factorConver = (4 * 9.78)/ (1000 * 256) ;
 
-char bufferData[64] = "Accel testing...";
+char bufferData[128] = "Accel testing...";
 char bufferMsg[64] = {0};
 
 float datoX = 0;
@@ -82,9 +86,7 @@ uint64_t ejeZAccel[2000];
 
 //Definición de las cabeceras de las funciones del main
 void initSystem(void);
-void dataAccel(void);
 void dataPrintAccel(void);
-
 
 int main(void){
 
@@ -113,186 +115,108 @@ int main(void){
 //			sendMsg = 0;
 //		}
 
-
-//		//Datos del acelerometro  a 1ms en arreglos
-
-		if(flag1KHz == 1){
-
-			dataAccel();
-			flag1KHz = 0;
-		}
-
-		//Imprimir ciertos mensajes con información del acelerometro
-//		dataPrintAccel();
-
-//Prueba con entero
-//		if(rxData != '\0'){
-//			writeChar(&usartComm, rxData);
-//
-//			if(rxData == 'w'){
-//				sprintf(bufferData, "WHO_AM_I? (r)\n");
-//				writeMsg(&usartComm, bufferData);
-//
-//				i2cBuffer = i2c_readSingleRegister(&Accelerometer, WHO_AM_I);
-//				sprintf(bufferData, "dataRead = 0x%x \n", (unsigned int) i2cBuffer);
-//				writeMsg(&usartComm, bufferData);
-//				rxData = '\0';
-//			}
-//			else if (rxData == 'p'){
-//				sprintf(bufferData, "PWR_MGMT_1 state (r)\n");
-//				writeMsg(&usartComm, bufferData);
-//
-//				i2cBuffer = i2c_readSingleRegister(&Accelerometer, POWER_CTL);
-//				sprintf(bufferData, "dataRead = 0x%x \n", (unsigned int) i2cBuffer);
-//				writeMsg(&usartComm, bufferData);
-//				rxData = '\0';
-//			}
-//			else if (rxData == 'r'){
-//				sprintf(bufferData, "PWR_MGMT_1 reset (w)\n");
-//				writeMsg(&usartComm, bufferData);
-//
-//				i2c_writeSingleRegister(&Accelerometer, POWER_CTL , 0x2D);
-//				rxData = '\0';
-//			}
-//			else if (rxData == 'x'){
-//				sprintf(bufferData, "Axis X data (r) \n");
-//				writeMsg(&usartComm, bufferData);
-//
-//				uint8_t AccelX_low =  i2c_readSingleRegister(&Accelerometer, ACCEL_XOUT_L);
-//				uint8_t AccelX_high = i2c_readSingleRegister(&Accelerometer, ACCEL_XOUT_H);
-//				int16_t AccelX = AccelX_high << 8 | AccelX_low;
-//				sprintf(bufferData, "AccelX = %d \n", (int)AccelX);
-//				writeMsg(&usartComm, bufferData);
-//				rxData = '\0';
-//			}
-//			else if(rxData == 'y'){
-//				sprintf(bufferData, "Axis Y data (r)\n");
-//				writeMsg(&usartComm, bufferData);
-//				uint8_t AccelY_low = i2c_readSingleRegister(&Accelerometer, ACCEL_YOUT_L);
-//				uint8_t AccelY_high = i2c_readSingleRegister(&Accelerometer,ACCEL_YOUT_H);
-//				uint16_t AccelY = AccelY_high << 8 | AccelY_low;
-//				float datoY = ((float)AccelY - 57800)* factorConver ;
-//				sprintf(bufferData, "AccelY = %.2f \n", (float) datoY);
-//				writeMsg(&usartComm, bufferData);
-//				rxData = '\0';
-//			}
-//			else if(rxData == 'z'){
-//				sprintf(bufferData, "Axis Z data (r)\n");
-//				writeMsg(&usartComm, bufferData);
-//
-//				uint8_t AccelZ_low = i2c_readSingleRegister(&Accelerometer, ACCEL_ZOUT_L);
-//				uint8_t AccelZ_high = i2c_readSingleRegister(&Accelerometer, ACCEL_ZOUT_H);
-//				uint16_t AccelZ = AccelZ_high << 8 | AccelZ_low;
-//				sprintf(bufferData, "AccelZ = %d \n", (int)AccelZ);
-//				writeMsg(&usartComm, bufferData);
-//				rxData = '\0';
-//			}
-//			else{
-//				rxData = '\0';
-//			}
-//		}
+		//Imprime información del acelerometro con las letras w,s,r,x,y,z,a.
+		dataPrintAccel();
 
 	}
 	return 0;
 }
 
-//Función que muestra diferentes mensajes dependiendo de algunas letras
+
+//Función que imprime informacion del acelerometro dependiendo de algunas letras,
+//muestreando a 1KHz
 void dataPrintAccel(void){
-	if(rxData != '\0'){
-		writeChar(&usartComm, rxData);
-		dataAccel();
 
-		if(rxData == 'w'){
-			sprintf(bufferData, "WHO_AM_I? (r)\n");
-			writeMsg(&usartComm, bufferData);
+	if(flag1KHz == 1){
+		if(rxData != '\0'){
+			writeChar(&usartComm, rxData);
 
-			i2cBuffer = i2c_readSingleRegister(&Accelerometer, WHO_AM_I);
-			sprintf(bufferData, "dataRead = 0x%x \n", (unsigned int) i2cBuffer);
-			writeMsg(&usartComm, bufferData);
-			rxData = '\0';
-		}
-		else if (rxData == 'p'){
-			sprintf(bufferData, "PWR_MGMT_1 state (r)\n");
-			writeMsg(&usartComm, bufferData);
+			if(rxData == 'w'){
+				sprintf(bufferData, "WHO_AM_I? (r)\n");
+				writeMsg(&usartComm, bufferData);
 
-			i2cBuffer = i2c_readSingleRegister(&Accelerometer, POWER_CTL);
-			sprintf(bufferData, "dataRead = 0x%x \n", (unsigned int) i2cBuffer);
-			writeMsg(&usartComm, bufferData);
-			rxData = '\0';
-		}
-		if (rxData == 'r'){
-			sprintf(bufferData, "PWR_MGMT_1 reset (w)\n");
-			writeMsg(&usartComm, bufferData);
+				i2cBuffer = i2c_readSingleRegister(&Accelerometer, WHO_AM_I);
+				sprintf(bufferData, "dataRead = 0x%x \n", (unsigned int) i2cBuffer);
+				writeMsg(&usartComm, bufferData);
+				rxData = '\0';
+			}
+			else if (rxData == 's'){
+				sprintf(bufferData, "PWR_MGMT_1 state (r)\n");
+				writeMsg(&usartComm, bufferData);
 
-			i2c_writeSingleRegister(&Accelerometer, POWER_CTL , 0x2D);
-			rxData = '\0';
-		}
-		else if (rxData == 'x'){
-			sprintf(bufferData, "Axis X data (r) \n");
-			writeMsg(&usartComm, bufferData);
+				i2cBuffer = i2c_readSingleRegister(&Accelerometer, POWER_CTL);
+				sprintf(bufferData, "dataRead = 0x%x \n", (unsigned int) i2cBuffer);
+				writeMsg(&usartComm, bufferData);
+				rxData = '\0';
+			}
+			if (rxData == 'r'){
+				sprintf(bufferData, "PWR_MGMT_1 reset (w)\n");
+				writeMsg(&usartComm, bufferData);
 
-			sprintf(bufferData, "AccelX = %.3f \n", (float)datoX);
-			writeMsg(&usartComm, bufferData);
-			rxData = '\0';
-		}
-		else if(rxData == 'y'){
-			sprintf(bufferData, "Axis Y data (r)\n");
-			writeMsg(&usartComm, bufferData);
+				i2c_writeSingleRegister(&Accelerometer, POWER_CTL , 0x2D);
+				rxData = '\0';
+			}
+			else if (rxData == 'x'){
+				sprintf(bufferData, "Axis X data (r) \n");
+				writeMsg(&usartComm, bufferData);
 
-			sprintf(bufferData, "AccelY = %.3f \n", (float)datoY);
-			writeMsg(&usartComm, bufferData);
-			rxData = '\0';
-		}
-		else if(rxData == 'z'){
-			sprintf(bufferData, "Axis Z data (r)\n");
-			writeMsg(&usartComm, bufferData);
+				uint8_t AccelX_low =  i2c_readSingleRegister(&Accelerometer, ACCEL_XOUT_L);
+				uint8_t AccelX_high = i2c_readSingleRegister(&Accelerometer, ACCEL_XOUT_H);
+				int16_t AccelX = AccelX_high << 8 | AccelX_low;
+				float datoX = (float)AccelX * factorConver;
 
-			sprintf(bufferData, "AccelZ = %.3f \n", (float) datoZ);
-			writeMsg(&usartComm, bufferData);
-			rxData = '\0';
+				sprintf(bufferData, "AccelX = %.2f m/s² \n", datoX);
+				writeMsg(&usartComm, bufferData);
+				rxData = '\0';
+			}
+			else if(rxData == 'y'){
+				sprintf(bufferData, "Axis Y data (r)\n");
+				writeMsg(&usartComm, bufferData);
+
+				uint8_t AccelY_low = i2c_readSingleRegister(&Accelerometer, ACCEL_YOUT_L);
+				uint8_t AccelY_high = i2c_readSingleRegister(&Accelerometer,ACCEL_YOUT_H);
+				uint16_t AccelY = AccelY_high << 8 | AccelY_low;
+				float datoY = ((float)AccelY - 57800)* factorConver ;
+
+				sprintf(bufferData, "AccelY = %.2f m/s² \n", datoY);
+				writeMsg(&usartComm, bufferData);
+				rxData = '\0';
+			}
+			else if(rxData == 'z'){
+				sprintf(bufferData, "Axis Z data (r)\n");
+				writeMsg(&usartComm, bufferData);
+
+				uint8_t AccelZ_low = i2c_readSingleRegister(&Accelerometer, ACCEL_ZOUT_L);
+				uint8_t AccelZ_high = i2c_readSingleRegister(&Accelerometer, ACCEL_ZOUT_H);
+				uint16_t AccelZ = AccelZ_high << 8 | AccelZ_low;
+				float datoZ = (float)AccelZ * factorConver;
+
+				sprintf(bufferData, "AccelZ = %.2f m/s² \n", datoZ);
+				writeMsg(&usartComm, bufferData);
+				rxData = '\0';
+			}
+			else if(rxData == 'a'){
+				writeMsg(&usartComm, "Datos 3 ejes \n" );
+				for(int i = 0; i<2000; i++){
+					 sprintf(bufferData, " dato %d; AccelX = %.3f ;   AccelY = %.3f;  AccelZ = %.3f  m/s² \n",i,((float)ejeXAccel[i]),((float)ejeYAccel[i]),((float)ejeZAccel[i]));
+					 writeMsg(&usartComm, bufferData);
+					 rxData = '\0';
+				}
+				flag2seg = 0;
+			}
+			else{
+				rxData = '\0';
+			}
 		}
-//		else if(rxData == 'a'){
-//			writeMsg(&usartComm, "Datos 3 ejes \n" );
-//			for(int i = 0; i<2000; i++){
-//				 sprintf(bufferData, "dato %d; AccelX = %.3f;   AccelY = %.3f;  AccelZ = %.3f \n",i,((float)ejeXAccel[i]),((float)ejeYAccel[i]),((float)ejeZAccel[i]));
-//				 writeMsg(&usartComm, bufferData);
-//				 rxData = '\0';
-//			}
-//			flag2seg = 0;
-//		}
-		else{
-			rxData = '\0';
+		flag1KHz = 0;
+
+		if(contData < 2000){
+			ejeXAccel[contData] = datoX;
+			ejeYAccel[contData] = datoY;
+			ejeZAccel[contData] = datoZ;
 		}
+
 	}
-}
-
-//Guarda los datos del acelerometro que se muestrean a 1KHz
-void dataAccel(void){
-
-	//Datos eje X
-	uint8_t AccelX_low =  i2c_readSingleRegister(&Accelerometer, ACCEL_XOUT_L);
-	uint8_t AccelX_high = i2c_readSingleRegister(&Accelerometer, ACCEL_XOUT_H);
-	int16_t AccelX = AccelX_high << 8 | AccelX_low;
-	float datoX = (float)AccelX * factorConver;
-
-	//Datos eje Y
-	uint8_t AccelY_low = i2c_readSingleRegister(&Accelerometer, ACCEL_YOUT_L);
-	uint8_t AccelY_high = i2c_readSingleRegister(&Accelerometer,ACCEL_YOUT_H);
-	uint16_t AccelY = AccelY_high << 8 | AccelY_low;
-	float datoY = ((float)AccelY - 57800)* factorConver ;
-
-	//Datos eje Z
-	uint8_t AccelZ_low = i2c_readSingleRegister(&Accelerometer, ACCEL_ZOUT_L);
-	uint8_t AccelZ_high = i2c_readSingleRegister(&Accelerometer, ACCEL_ZOUT_H);
-	uint16_t AccelZ = AccelZ_high << 8 | AccelZ_low;
-	float datoZ = (float)AccelZ * factorConver;
-
-	if(contData < 2000){
-		ejeXAccel[contData] = datoX;
-		ejeYAccel[contData] = datoY;
-		ejeZAccel[contData] = datoZ;
-	}
-
 }
 
 void initSystem(void){
@@ -399,7 +323,70 @@ void initSystem(void){
 	Accelerometer.ptrI2Cx                            = I2C1;
 	Accelerometer.modeI2C                            = I2C_MODE_FM;
 	Accelerometer.slaveAddress                       = ACCEL_ADDRESS;
+	Accelerometer.mainClock							 = MAIN_CLOCK_80_MHz_FOR_I2C;
 	i2c_config(&Accelerometer);
+
+	/* Configuramos el PWM para la señal 1*/
+	handlerPinPwmChannel1.pGPIOx                             = GPIOC;
+	handlerPinPwmChannel1.GPIO_PinConfig.GPIO_PinNumber		 = PIN_6;
+	handlerPinPwmChannel1.GPIO_PinConfig.GPIO_PinMode		 = GPIO_MODE_ALTFN;
+	handlerPinPwmChannel1.GPIO_PinConfig.GPIO_PinOType		 = GPIO_OTYPE_PUSHPULL;
+	handlerPinPwmChannel1.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
+	handlerPinPwmChannel1.GPIO_PinConfig.GPIO_PinSpeed		 = GPIO_OSPEED_FAST;
+	handlerPinPwmChannel1.GPIO_PinConfig.GPIO_PinAltFunMode	 = AF2;
+	GPIO_Config(&handlerPinPwmChannel1);
+
+	handlerSignal1PWM.ptrTIMx								= TIM3;
+	handlerSignal1PWM.config.channel						= PWM_CHANNEL_1;
+	handlerSignal1PWM.config.duttyCicle						= duttyValue;
+	handlerSignal1PWM.config.periodo						= 20000;
+	handlerSignal1PWM.config.prescaler						= 16;
+	pwm_Config(&handlerSignal1PWM);
+
+	enableOutput(&handlerSignal1PWM);
+	startPwmSignal(&handlerSignal1PWM);
+
+	/* Configuramos el PWM para la señal 2*/
+	handlerPinPwmChannel2.pGPIOx                             = GPIOC;
+	handlerPinPwmChannel2.GPIO_PinConfig.GPIO_PinNumber		 = PIN_7;
+	handlerPinPwmChannel2.GPIO_PinConfig.GPIO_PinMode		 = GPIO_MODE_ALTFN;
+	handlerPinPwmChannel2.GPIO_PinConfig.GPIO_PinOType		 = GPIO_OTYPE_PUSHPULL;
+	handlerPinPwmChannel2.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
+	handlerPinPwmChannel2.GPIO_PinConfig.GPIO_PinSpeed		 = GPIO_OSPEED_FAST;
+	handlerPinPwmChannel2.GPIO_PinConfig.GPIO_PinAltFunMode	 = AF2;
+	GPIO_Config(&handlerPinPwmChannel2);
+
+	handlerSignal2PWM.ptrTIMx								= TIM3;
+	handlerSignal2PWM.config.channel						= PWM_CHANNEL_2;
+	handlerSignal2PWM.config.duttyCicle						= duttyValue;
+	handlerSignal2PWM.config.periodo						= 20000;
+	handlerSignal2PWM.config.prescaler						= 16;
+	pwm_Config(&handlerSignal2PWM);
+
+
+	enableOutput(&handlerSignal2PWM);
+	startPwmSignal(&handlerSignal2PWM);
+
+	/* Configuramos el PWM para la señal 3*/
+	handlerPinPwmChannel3.pGPIOx                             = GPIOC;
+	handlerPinPwmChannel3.GPIO_PinConfig.GPIO_PinNumber		 = PIN_8;
+	handlerPinPwmChannel3.GPIO_PinConfig.GPIO_PinMode		 = GPIO_MODE_ALTFN;
+	handlerPinPwmChannel3.GPIO_PinConfig.GPIO_PinOType		 = GPIO_OTYPE_PUSHPULL;
+	handlerPinPwmChannel3.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
+	handlerPinPwmChannel3.GPIO_PinConfig.GPIO_PinSpeed		 = GPIO_OSPEED_FAST;
+	handlerPinPwmChannel3.GPIO_PinConfig.GPIO_PinAltFunMode	 = AF2;
+	GPIO_Config(&handlerPinPwmChannel3);
+
+	handlerSignal3PWM.ptrTIMx								= TIM3;
+	handlerSignal3PWM.config.channel						= PWM_CHANNEL_3;
+	handlerSignal3PWM.config.duttyCicle						= duttyValue;
+	handlerSignal3PWM.config.periodo						= 20000;
+	handlerSignal3PWM.config.prescaler						= 16;
+	pwm_Config(&handlerSignal3PWM);
+
+
+	enableOutput(&handlerSignal3PWM);
+	startPwmSignal(&handlerSignal3PWM);
 
 }
 
@@ -411,14 +398,14 @@ void BasicTimer2_Callback(void){
 void BasicTimer5_Callback(void){
 	GPIOxTooglePin(&handlerMuestreoPin);
 
-//	if(contData < 2000){
-//		contData++;
-//
-//		flag2seg = 1;
-//	}
-//	else{
-//		contData = 0;
-//	}
+	if(contData < 2000){
+		contData++;
+
+		flag2seg = 1;
+	}
+	else{
+		contData = 0;
+	}
 
 	flag1KHz = 1;
 }

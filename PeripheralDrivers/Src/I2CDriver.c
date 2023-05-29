@@ -51,22 +51,24 @@ void i2c_config(I2C_Handler_t *ptrHandlerI2C){
 		//Seleccionamos el modo estandar
 		ptrHandlerI2C->ptrI2Cx->CCR &= ~I2C_CCR_FS;
 
+		//VOLVER A CAMBIAR LUEGO A 16 MHZ
 		//Configuramos el registro que se encarga de generar la señal de reloj
-		ptrHandlerI2C->ptrI2Cx->CCR |= (I2C_MODE_SM_SPEED_100KHz << I2C_CCR_CCR_Pos);
+		ptrHandlerI2C->ptrI2Cx->CCR |= (I2C_MODE_SM_SPEED_100KHz_80MHz << I2C_CCR_CCR_Pos);
 
 		//Configuramos el registro que controla el tiempo T-Rise máximo
-		ptrHandlerI2C->ptrI2Cx->TRISE |= I2C_MAX_RISE_TIME_SM;
+		ptrHandlerI2C->ptrI2Cx->TRISE |= I2C_MAX_RISE_TIME_SM_80MHz;
 	}
 	else{
 		//Estamos en modo "Fast" (FM Mode)
 		//Seleccionamos el modo Fast
 		ptrHandlerI2C->ptrI2Cx->CCR |= I2C_CCR_FS;
 
+		//VOLVER A CAMBIAR LUEGO A 16 MHZ
 		//Configuramos el registro que se encarga de generar la señal de reloj
-		ptrHandlerI2C->ptrI2Cx->CCR |= (I2C_MODE_FM_SPEED_400KHz << I2C_CCR_CCR_Pos);
+		ptrHandlerI2C->ptrI2Cx->CCR |= (I2C_MODE_FM_SPEED_400KHz_80MHz << I2C_CCR_CCR_Pos);
 
 		//Configuramos el registro que controla el tiempo T-Rise máximo
-		ptrHandlerI2C->ptrI2Cx->TRISE |= I2C_MAX_RISE_TIME_FM;
+		ptrHandlerI2C->ptrI2Cx->TRISE |= I2C_MAX_RISE_TIME_FM_80MHz;
 
 	}
 
