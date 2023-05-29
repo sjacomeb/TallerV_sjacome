@@ -96,6 +96,7 @@ int main(void){
 	/* Activamos el coprocesador matematico*/
 	SCB->CPACR |= (0xF << 20);
 
+	//Función que pone la velocidad a 80 MHz
 	configPLL();
 
 	writeMsg(&usartComm, bufferData);
@@ -198,7 +199,7 @@ void dataPrintAccel(void){
 			else if(rxData == 'a'){
 				writeMsg(&usartComm, "Datos 3 ejes \n" );
 				for(int i = 0; i<2000; i++){
-					 sprintf(bufferData, " dato %d; AccelX = %.3f ;   AccelY = %.3f;  AccelZ = %.3f  m/s² \n",i,((float)ejeXAccel[i]),((float)ejeYAccel[i]),((float)ejeZAccel[i]));
+					 sprintf(bufferData, " dato %d; AccelX = %.2f ;   AccelY = %.2f;  AccelZ = %.2f  m/s² \n",i,((float)ejeXAccel[i]),((float)ejeYAccel[i]),((float)ejeZAccel[i]));
 					 writeMsg(&usartComm, bufferData);
 					 rxData = '\0';
 				}
@@ -268,7 +269,7 @@ void initSystem(void){
 	ExtiButton.edgeType = EXTERNAL_INTERRUPT_RISING_EDGE;
 	extInt_Config(&ExtiButton);
 
-	/* Configuracion de la comunicación serial para el Usart */
+	/* Configuracion de la comunicación serial para el Usart1 */
 	handlerPinTx.pGPIOx 								= GPIOA;
 	handlerPinTx.GPIO_PinConfig.GPIO_PinNumber 			= PIN_9;
 	handlerPinTx.GPIO_PinConfig.GPIO_PinMode 			= GPIO_MODE_ALTFN;
@@ -327,8 +328,8 @@ void initSystem(void){
 	i2c_config(&Accelerometer);
 
 	/* Configuramos el PWM para la señal 1*/
-	handlerPinPwmChannel1.pGPIOx                             = GPIOC;
-	handlerPinPwmChannel1.GPIO_PinConfig.GPIO_PinNumber		 = PIN_6;
+	handlerPinPwmChannel1.pGPIOx                             = GPIOB;
+	handlerPinPwmChannel1.GPIO_PinConfig.GPIO_PinNumber		 = PIN_4;
 	handlerPinPwmChannel1.GPIO_PinConfig.GPIO_PinMode		 = GPIO_MODE_ALTFN;
 	handlerPinPwmChannel1.GPIO_PinConfig.GPIO_PinOType		 = GPIO_OTYPE_PUSHPULL;
 	handlerPinPwmChannel1.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
@@ -340,7 +341,7 @@ void initSystem(void){
 	handlerSignal1PWM.config.channel						= PWM_CHANNEL_1;
 	handlerSignal1PWM.config.duttyCicle						= duttyValue;
 	handlerSignal1PWM.config.periodo						= 20000;
-	handlerSignal1PWM.config.prescaler						= 16;
+	handlerSignal1PWM.config.prescaler						= 80;
 	pwm_Config(&handlerSignal1PWM);
 
 	enableOutput(&handlerSignal1PWM);
@@ -360,7 +361,7 @@ void initSystem(void){
 	handlerSignal2PWM.config.channel						= PWM_CHANNEL_2;
 	handlerSignal2PWM.config.duttyCicle						= duttyValue;
 	handlerSignal2PWM.config.periodo						= 20000;
-	handlerSignal2PWM.config.prescaler						= 16;
+	handlerSignal2PWM.config.prescaler						= 80;
 	pwm_Config(&handlerSignal2PWM);
 
 
@@ -381,7 +382,7 @@ void initSystem(void){
 	handlerSignal3PWM.config.channel						= PWM_CHANNEL_3;
 	handlerSignal3PWM.config.duttyCicle						= duttyValue;
 	handlerSignal3PWM.config.periodo						= 20000;
-	handlerSignal3PWM.config.prescaler						= 16;
+	handlerSignal3PWM.config.prescaler						= 80;
 	pwm_Config(&handlerSignal3PWM);
 
 
