@@ -112,7 +112,7 @@ int main(void){
 	configPLL();
 
 	//Mensaje de inicio
-	writeMsg(&usartComm, bufferData);
+//	writeMsg(&usartComm, bufferData);
 
 	//Activar la velocidad de salida a 1600 Hz en el acelerometro
 	i2c_writeSingleRegister(&Accelerometer, BW_RATE, OUTPUT_RATE);
@@ -133,12 +133,12 @@ int main(void){
 	while(1){
 
 		//Prueba de Rx y Tx
-//		if(sendMsg > 4){
+//		if(sendMsg > 2){
 //			writeChar(&usartComm, 'S');
 //			writeMsg(&usartComm, mensaje);
 //			writeCharTX(&usartComm, 'a');
 //			writeMsgTX(&usartComm, mensaje);
-
+//
 //			sendMsg = 0;
 //		}
 
@@ -354,7 +354,7 @@ void initSystem(void){
 	usartComm.USART_Config.USART_mode					= USART_MODE_RXTX;
 	usartComm.USART_Config.USART_stopbits				= USART_STOPBIT_1;
 	usartComm.USART_Config.USART_enableIntRX			= USART_RX_INTERRUPT_ENABLE;
-	usartComm.USART_Config.USART_enableIntTX			= USART_TX_INTERRUPT_DISABLE;
+	usartComm.USART_Config.USART_enableIntTX			= USART_TX_INTERRUPT_ENABLE;
 	USART_Config(&usartComm);
 
 	/* Configuración MCO1 (probar señal) */
