@@ -10,11 +10,10 @@
 
 #include <stm32f4xx.h>
 
-#define HSI_VALUE   16	//16 MHz
-#define HSE_VALUE	80	//80 MHz
+#define HSI_VALUE		16
 
 void configPLL(void);
-uint8_t getConfigPLL(void);
+uint16_t getConfigPLL(void);
 
 
 #endif /* PLLDRIVER_H_ */

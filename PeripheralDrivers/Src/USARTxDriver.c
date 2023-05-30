@@ -129,7 +129,7 @@ void USART_Config(USART_Handler_t *ptrUsartHandler){
 
 	// 2.5 Configuracion del Baudrate (SFR USART_BRR)
 
-//	//Frecuencia 16 MHz
+////Frecuencia 16 MHz
 //	if(ptrUsartHandler->USART_Config.USART_baudrate == USART_BAUDRATE_9600){
 //		// El valor a cargar es 104.1875 -> Mantiza = 104,fraction = 0.1875
 //		// Mantiza = 104 = 0x68, fraction = 16 * 0.1875 = 3
@@ -152,25 +152,6 @@ void USART_Config(USART_Handler_t *ptrUsartHandler){
 //		ptrUsartHandler->ptrUSARTx->BRR = 0x8B;
 //	}
 
-//	//Frecuencia 40 MHz
-//	if(ptrUsartHandler->USART_Config.USART_baudrate == USART_BAUDRATE_9600){
-//		// El valor a cargar es 260,4167
-//		// Mantiza = 260 = 0x104, fraction = 16 * 0.4167 = 7 = 0x7
-//		// Valor a cargar 0x1047
-//		ptrUsartHandler->ptrUSARTx->BRR = 0x1047;
-//	}
-//	else if(ptrUsartHandler->USART_Config.USART_baudrate == USART_BAUDRATE_19200){
-//		// El valor a cargar es 130,2083
-//		// Mantiza = 130 = 0x82, fraction = 16 * 0.2083 = 3 = 0x3
-//		// Valor a cargar 0x823
-//		ptrUsartHandler->ptrUSARTx->BRR = 0x823;
-//	}
-//	else if(ptrUsartHandler->USART_Config.USART_baudrate == USART_BAUDRATE_115200){
-//		// El valor a cargar es 21,7014
-//		// Mantiza = 21 = 0x15, fraction = 16 * 0,7014 = 11 = 0xB
-//		// Valor a cargar 0x15B
-//		ptrUsartHandler->ptrUSARTx->BRR = 0x15B;
-//	}
 
 	//Frecuencia 80 MHz
 	if(ptrUsartHandler->USART_Config.USART_baudrate == USART_BAUDRATE_9600){

@@ -8,6 +8,11 @@
 #include <stm32f4xx.h>
 #include "PLLDriver.h"
 
+uint16_t valuePlln = 0;
+uint16_t valuePllm = 0;
+uint16_t valuePllp = 2;
+uint16_t frecuencia = 0;
+
 /* Esta configuración es para 80 MHz */
 //Función para cargar la configuración de los registros
 void configPLL(void){
@@ -68,24 +73,16 @@ void configPLL(void){
 }
 
 //Función que entrega la frecuencia en MHz
-uint8_t getConfigPLL(void){
+uint16_t getConfigPLL(void){
 
-	uint8_t freqClock = 0;
+	//Guarda el valor de los registros en las variables
 
-	uint16_t valuePlln = ((RCC_PLLCFGR_PLLN & RCC_PLLCFGR_PLLN_Msk) >> RCC_PLLCFGR_PLLN_Pos);
-	uint16_t valuePllm = ((RCC_PLLCFGR_PLLM & RCC_PLLCFGR_PLLM_Msk) >> RCC_PLLCFGR_PLLM_Pos);
+	valuePlln = (RCC->PLLCFGR >> RCC_PLLCFGR_PLLN_Pos);
+	valuePllm = (RCC->PLLCFGR >> RCC_PLLCFGR_PLLM_Pos);
+	valuePllm &= (RCC_PLLCFGR_PLLM);
 
-	if( freqClock == 16 ){
+	uint16_t frecuencia = ((HSI_VALUE * valuePlln) / (valuePllm * valuePllp)) ;
 
-		freqClock = HSI_VALUE ;
-
-	}
-	else{
-
-		freqClock = ((HSI_VALUE * valuePlln) / valuePllm) / 2 ;		//valuePLLP = 2
-	}
-
-	return freqClock ;
-
+	return frecuencia;
 }
 
