@@ -9,8 +9,6 @@
 #include "LcdDriver.h"
 #include "SysTickDriver.h"
 
-#include <stdint.h>
-#include "LcdDriver.h"
 
 void LCD_sendCMD (I2C_Handler_t *ptrHandlerI2C, char cmd){
 	char _U;
