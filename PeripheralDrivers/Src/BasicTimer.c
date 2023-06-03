@@ -134,9 +134,6 @@ void BasicTimer_Config(BasicTimer_Handler_t *ptrBTimerHandler){
 	__enable_irq();
 }
 
-void startCounterTimer(void){
-
-}
 
 
 __attribute__((weak)) void BasicTimer2_Callback(void){

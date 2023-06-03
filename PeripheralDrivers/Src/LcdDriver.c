@@ -6,27 +6,11 @@
  */
 
 #include <stdint.h>
-#include "LcdDriver.h"
+#include <LcdDriver.h>
 #include "SysTickDriver.h"
 
 
-void LCD_sendCMD (I2C_Handler_t *ptrHandlerI2C, char cmd){
-	char _U;
-	char _L;
-	uint8_t _T[4];
-	_U=(cmd & 0xf0);
-	_L=((cmd<<4) & 0xf0);
-	_T[0] = _U|0x0C;
-	writeDataLCD(ptrHandlerI2C, _T[0]);
-	_T[1] = _U|0x08;
-	writeDataLCD(ptrHandlerI2C, _T[1]);
-	_T[2] = _L|0x0C;
-	writeDataLCD(ptrHandlerI2C, _T[2]);
-	_T[3] = _L|0x08;
-	writeDataLCD(ptrHandlerI2C, _T[3]);
-}
-
-void writeDataLCD(I2C_Handler_t *ptrHandlerI2C, uint8_t dataToWrite){
+void writeLCD(I2C_Handler_t *ptrHandlerI2C, uint8_t dataToWrite){
 
 	/* 1. Generamos la condición de Start*/
 	i2c_startTransaction(ptrHandlerI2C);
@@ -40,75 +24,93 @@ void writeDataLCD(I2C_Handler_t *ptrHandlerI2C, uint8_t dataToWrite){
 	i2c_stopTransaction(ptrHandlerI2C);
 }
 
+void CMD_toLCD(I2C_Handler_t *ptrHandlerI2C, char cmd){
+	char _U;
+	char _L;
+	uint8_t _T[4];
+	_U=(cmd & 0xf0);
+	_L=((cmd<<4) & 0xf0);
+	_T[0] = _U|0x0C;
+	writeLCD(ptrHandlerI2C, _T[0]);
+	_T[1] = _U|0x08;
+	writeLCD(ptrHandlerI2C, _T[1]);
+	_T[2] = _L|0x0C;
+	writeLCD(ptrHandlerI2C, _T[2]);
+	_T[3] = _L|0x08;
+	writeLCD(ptrHandlerI2C, _T[3]);
+}
 
-void sendataLCD (I2C_Handler_t *ptrHandlerI2C, char data){
+
+
+
+void sendDataLCD(I2C_Handler_t *ptrHandlerI2C, char data){
 	char _U;
 	char _L;
 	uint8_t _T[4];
 	_U=(data & 0xf0);
 	_L=((data<<4) & 0xf0);
 	_T[0] = _U|0x0D;
-	writeDataLCD(ptrHandlerI2C, _T[0]);
+	writeLCD(ptrHandlerI2C, _T[0]);
 	_T[1] = _U|0x09;
-	writeDataLCD(ptrHandlerI2C, _T[1]);
+	writeLCD(ptrHandlerI2C, _T[1]);
 	_T[2] = _L|0x0D;
-	writeDataLCD(ptrHandlerI2C, _T[2]);
+	writeLCD(ptrHandlerI2C, _T[2]);
 	_T[3] = _L|0x09;
-	writeDataLCD(ptrHandlerI2C, _T[3]);
+	writeLCD(ptrHandlerI2C, _T[3]);
 }
 
-void clearLCD (I2C_Handler_t *ptrHandlerI2C) {
-//	LCD_sendata (ptrHandlerI2C, 0x00);
-	LCD_sendCMD(ptrHandlerI2C, 0x01);
+void cleanLCD(I2C_Handler_t *ptrHandlerI2C){
+	CMD_toLCD(ptrHandlerI2C, 0x01);
 	delay_ms(50);
 }
 
-void initLCD (I2C_Handler_t *ptrHandlerI2C) {
+void InitLCD(I2C_Handler_t *ptrHandlerI2C){
 
-	// Delay de inizializacion
+	// Delay para iniciar
 	delay_ms(50);
-	// Primer 0x30 para BF
-	LCD_sendCMD (ptrHandlerI2C, 0x30);
+
+	CMD_toLCD(ptrHandlerI2C, 0x30);
 	delay_ms(5);
-	// Segundo 0x30 para BF
-	LCD_sendCMD (ptrHandlerI2C, 0x30);
+
+	CMD_toLCD(ptrHandlerI2C, 0x30);
 	delay_ms(1);
-	// Tercer 0x30 para BF
-	LCD_sendCMD (ptrHandlerI2C, 0x30);
 
-	// Delay después de la secuencia inicial de inicializacion
+	CMD_toLCD(ptrHandlerI2C, 0x30);
+
+	// Delay después inicializar
 	delay_ms(50);
 
-	/*
-	 * Configuraciones para la escritura
-	 */
+
+	  // Configuracion para escribir
+
 	// Data lenght 4, lines 2, character font 5X8
-	LCD_sendCMD (ptrHandlerI2C, 0x20);
+	CMD_toLCD(ptrHandlerI2C, 0x20);
 	delay_ms(50);
-	LCD_sendCMD (ptrHandlerI2C, 0x28);
+	CMD_toLCD(ptrHandlerI2C, 0x28);
 	delay_ms(50);
-	// Display off
-	LCD_sendCMD (ptrHandlerI2C, 0x08);
+	// Display apagado
+	CMD_toLCD(ptrHandlerI2C, 0x08);
 	delay_ms(50);
-	// Display Clear
-	LCD_sendCMD (ptrHandlerI2C, 0x01);
+	// Limpiando el Display
+	CMD_toLCD(ptrHandlerI2C, 0x01);
 	delay_ms(50);
-	// Entry mode
-	LCD_sendCMD (ptrHandlerI2C, 0x06);
+	// modo de entrada
+	CMD_toLCD(ptrHandlerI2C, 0x06);
 
 	delay_ms(50);
 	// Delay para encendido
-	LCD_sendCMD (ptrHandlerI2C, 0x0C);
+	CMD_toLCD(ptrHandlerI2C, 0x0C);
 }
 
-void LCD_sendSTR(I2C_Handler_t *ptrHandlerI2C, char *str) {
-	while (*str) sendataLCD (ptrHandlerI2C, *str++);
+void sendMsgLCD(I2C_Handler_t *ptrHandlerI2C, char *str){
+	while (*str) sendDataLCD(ptrHandlerI2C, *str++);
 }
-void setCursorLCD(I2C_Handler_t *ptrHandlerI2C, uint8_t x, uint8_t y) {
+
+void moveCursorLCD(I2C_Handler_t *ptrHandlerI2C, uint8_t x, uint8_t y){
 	uint8_t cursor;
-	switch (y) {
+	switch (x) {
 	case 0 :
-		switch (x) {
+		switch (y) {
 		case 0 : cursor = 0x00; break;
 		case 1 : cursor = 0x01; break;
 		case 2 : cursor = 0x02; break;
@@ -132,7 +134,7 @@ void setCursorLCD(I2C_Handler_t *ptrHandlerI2C, uint8_t x, uint8_t y) {
 		} break;
 
 	case 1 :
-		switch (x) {
+		switch (y) {
 		case 0 : cursor = 0x40; break;
 		case 1 : cursor = 0x41; break;
 		case 2 : cursor = 0x42; break;
@@ -156,7 +158,7 @@ void setCursorLCD(I2C_Handler_t *ptrHandlerI2C, uint8_t x, uint8_t y) {
 		} break;
 
 	case 2 :
-		switch (x) {
+		switch (y) {
 		case 0 : cursor = 0x14; break;
 		case 1 : cursor = 0x15; break;
 		case 2 : cursor = 0x16; break;
@@ -180,7 +182,7 @@ void setCursorLCD(I2C_Handler_t *ptrHandlerI2C, uint8_t x, uint8_t y) {
 		} break;
 
 	case 3 :
-		switch (x) {
+		switch (y) {
 		case 0 : cursor = 0x54; break;
 		case 1 : cursor = 0x55; break;
 		case 2 : cursor = 0x56; break;
@@ -203,11 +205,14 @@ void setCursorLCD(I2C_Handler_t *ptrHandlerI2C, uint8_t x, uint8_t y) {
 		case 19 : cursor = 0x67; break;
 		} break;
 	}
-	LCD_sendCMD(ptrHandlerI2C, 0x80|cursor);
+	CMD_toLCD(ptrHandlerI2C, 0x80|cursor);
 }
 
-void clearScreenLCD(I2C_Handler_t *ptrHandlerI2C){
-	for(int i=0 ; i <80 ;i++){
-		LCD_sendSTR(ptrHandlerI2C, "  ");
+
+void ResetScreenLCD(I2C_Handler_t *ptrHandlerI2C){
+	char DataClean[64] = "                    ";
+	for(int i=0;i<4;i++){
+		moveCursorLCD(ptrHandlerI2C, i, 0);
+		sendMsgLCD(ptrHandlerI2C,DataClean);
 	}
 }
