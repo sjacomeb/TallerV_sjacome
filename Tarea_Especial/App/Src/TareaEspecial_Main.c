@@ -455,9 +455,9 @@ void initSystem(void){
 	startPwmSignal(&handlerSignal3PWM);
 
 	/* Configuración PLL */
-	pll.PLLN 			= 100;
-	pll.PLLM			= 8;
-	pll.PLLP			= PLLP_2;
+	pll.PLLN 			= 60;
+	pll.PLLM			= 2;
+	pll.PLLP			= PLLP_6;
 	pll.MC01PRE			= MCO1PRE_4;
 
 	/* Configuración de la LCD */
