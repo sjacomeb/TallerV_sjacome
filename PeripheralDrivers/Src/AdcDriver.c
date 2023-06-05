@@ -29,8 +29,8 @@ void adc_Config(ADC_Config_t *adcConfig){
 	case ADC_RESOLUTION_12_BIT:
 	{
 		// 0b00
-		ADC1->CR1 |= ADC_CR1_RES;
-		ADC1 ->CR1 &= ~(ADC_CR1_RES);
+		ADC1->CR1 &= ~(ADC_CR1_RES_0);
+		ADC1 ->CR1 &= ~(ADC_CR1_RES_1);
 		break;
 	}
 
@@ -45,8 +45,8 @@ void adc_Config(ADC_Config_t *adcConfig){
 	case ADC_RESOLUTION_8_BIT:
 	{
 		//0b10
-		ADC1 ->CR1 &= ~(ADC_CR1_RES_1);
-		ADC1 ->CR1 |= ADC_CR1_RES_0;
+		ADC1 ->CR1 &= ~(ADC_CR1_RES_0);
+		ADC1 ->CR1 |= ADC_CR1_RES_1;
 		break;
 	}
 
