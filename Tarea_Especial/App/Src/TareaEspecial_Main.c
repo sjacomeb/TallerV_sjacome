@@ -26,6 +26,8 @@ GPIO_Handler_t 	handlerBlinkyPin 			= {0};
 GPIO_Handler_t	handlerMuestreoPin			= {0};
 BasicTimer_Handler_t handlerBlinkyTimer 	= {0};
 BasicTimer_Handler_t handlerTimer_1KHz		= {0};
+PLL_Config_t pll							= {0};
+
 
 
 /*Elementos para hacer la comunicación serial*/
@@ -109,7 +111,7 @@ int main(void){
 	SCB->CPACR |= (0xF << 20);
 
 	//Función que pone la velocidad a 80 MHz
-	configPLL();
+	configPLL(&pll);
 
 	//Mensaje de inicio
 //	writeMsg(&usartComm, bufferData);
@@ -451,6 +453,12 @@ void initSystem(void){
 
 	enableOutput(&handlerSignal3PWM);
 	startPwmSignal(&handlerSignal3PWM);
+
+	/* Configuración PLL */
+	pll.PLLN 			= 100;
+	pll.PLLM			= 8;
+	pll.PLLP			= PLLP_2;
+	pll.MC01PRE			= MCO1PRE_4;
 
 	/* Configuración de la LCD */
 //	lcdSCL.pGPIOx                                    = GPIOA;

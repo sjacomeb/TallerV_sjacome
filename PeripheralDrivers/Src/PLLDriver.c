@@ -15,29 +15,40 @@ uint16_t frecuencia = 0;
 
 /* Esta configuración es para 80 MHz */
 //Función para cargar la configuración de los registros
-void configPLL(void){
+void configPLL(PLL_Config_t *ptrhandlerPLL){
 
-	//Wait states to the Latency
-	FLASH->ACR  &= ~(FLASH_ACR_LATENCY);
-	FLASH->ACR |= (FLASH_ACR_LATENCY_2WS); //64 < HCLK ≤ 90
+	/* Configuración HSI*/
+	//Desactivo el registro
+	RCC->CR &= ~(RCC_CR_HSION);
+
+	//Ajuste
+	RCC->CR |= ( 10 << RCC_CR_HSITRIM_Pos);
+
+	//Activo el registro
+	RCC->CR |= RCC_CR_HSION;
 
 	RCC->PLLCFGR &= ~(RCC_PLLCFGR_PLLSRC); // HSI clock selected as PLL clock entry
 
-	//Se configura el valor que queremos obtener
+	/* Configuración de 100 MHz*/
+
 	//f(VCO clock) = 16 MHz * (PLLN/PLLM)
 
-	// PLLN = 60 MHz
-	RCC->PLLCFGR &= ~(RCC_PLLCFGR_PLLN);
-	RCC->PLLCFGR |= (0x3C << RCC_PLLCFGR_PLLN_Pos);
+	//Wait states to the Latency
+	FLASH->ACR  &= ~(FLASH_ACR_LATENCY);
+	FLASH->ACR |= (FLASH_ACR_LATENCY_3WS); //90 < HCLK ≤ 100
 
-	// PLLM = 2 MHz
+	// PLLN = 100 MHz
+	RCC->PLLCFGR &= ~(RCC_PLLCFGR_PLLN);
+	RCC->PLLCFGR |= (ptrhandlerPLL->PLLN << RCC_PLLCFGR_PLLN_Pos);
+
+	// PLLM = 8 MHz
 	RCC->PLLCFGR &= ~(RCC_PLLCFGR_PLLM);
-	RCC->PLLCFGR |= (RCC_PLLCFGR_PLLM_1);
+	RCC->PLLCFGR |= (ptrhandlerPLL->PLLM << RCC_PLLCFGR_PLLM_Pos);
 
 	//f(Clock output) = f(VCO clock) / PLLP
-	//La frecuencia deseada es 80 MHz, entonces PLLP = 6 MHz
+	//PLLP = 2 MHz
 	RCC->PLLCFGR &= ~(RCC_PLLCFGR_PLLP);
-	RCC->PLLCFGR |= (RCC_PLLCFGR_PLLP_1);
+	RCC->PLLCFGR |= (ptrhandlerPLL->PLLP << RCC_PLLCFGR_PLLP_Pos);
 
 	/* División de los buses */
 	//AHB prescaler, no se divide (trabaja a 100MHz > 80 MHz)
@@ -55,21 +66,22 @@ void configPLL(void){
 	// Seleccionamos la señal PLL
 	RCC -> CFGR |= RCC_CFGR_MCO1;
 
-	//Division de 4 (preescaler)
+	//Preescaler
 
-	RCC -> CFGR |= (RCC_CFGR_MCO1PRE);
 	RCC ->CFGR &= ~(RCC_CFGR_MCO1PRE_0);
+	RCC -> CFGR |= (ptrhandlerPLL->MC01PRE << RCC_CFGR_MCO1PRE_Pos);
 
 	/*Se enciende el PLL*/
 	RCC->CR |= RCC_CR_PLLON;
-
-	//SW : System clock switch
-	RCC->CFGR |= RCC_CFGR_SW_1;  // PLL selected as system clock
 
 	// Esperamos que el PLL se cierre (estabilizacion)
 	while (!(RCC->CR & RCC_CR_PLLRDY)){
 		__NOP();
 	}
+
+	//SW : System clock switch
+	RCC->CFGR |= RCC_CFGR_SW_1;  // PLL selected as system clock
+
 }
 
 //Función que entrega la frecuencia en MHz
@@ -81,7 +93,7 @@ uint16_t getConfigPLL(void){
 	valuePllm = (RCC->PLLCFGR >> RCC_PLLCFGR_PLLM_Pos);
 	valuePllm &= (RCC_PLLCFGR_PLLM);
 
-	uint16_t frecuencia = ((HSI_VALUE * valuePlln) / (valuePllm * valuePllp)) ;
+	uint16_t frecuencia = ((16 * valuePlln) / (valuePllm * valuePllp)) ;
 
 	return frecuencia;
 }
