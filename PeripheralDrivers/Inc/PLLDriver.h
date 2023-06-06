@@ -36,6 +36,8 @@ typedef struct
 
 
 void configPLL(PLL_Config_t *ptrhandlerPLL);
+void updateClock(PLL_Config_t *ptrhandlerPLL, uint8_t clock);
+void updatePreescaler(PLL_Config_t *ptrhandlerPLL, uint8_t preescaler);
 uint16_t getConfigPLL(void);
 
 

@@ -18,19 +18,21 @@ uint16_t frecuencia = 0;
 void configPLL(PLL_Config_t *ptrhandlerPLL){
 
 	/* Configuración HSI*/
-	//Desactivo el registro
+	//Desactivo el reloj
 	RCC->CR &= ~(RCC_CR_HSION);
 
-	//Ajuste
-	RCC->CR |= ( 10 << RCC_CR_HSITRIM_Pos);
+	//Limpio el registro del ajuste
+	RCC->CR &= ~(RCC_CR_HSITRIM);
 
-	//Activo el registro
+	//Ajuste para obtener exactamente 16 MHz
+	RCC->CR |= (12 << RCC_CR_HSITRIM_Pos);
+
+	//Activo el reloj
 	RCC->CR |= RCC_CR_HSION;
 
 	RCC->PLLCFGR &= ~(RCC_PLLCFGR_PLLSRC); // HSI clock selected as PLL clock entry
 
 	/* Configuración de 100 MHz*/
-
 	//f(VCO clock) = 16 MHz * (PLLN/PLLM)
 
 	//Wait states to the Latency
@@ -67,7 +69,6 @@ void configPLL(PLL_Config_t *ptrhandlerPLL){
 	RCC -> CFGR |= RCC_CFGR_MCO1;
 
 	//Preescaler
-
 	RCC ->CFGR &= ~(RCC_CFGR_MCO1PRE_0);
 	RCC -> CFGR |= (ptrhandlerPLL->MC01PRE << RCC_CFGR_MCO1PRE_Pos);
 
@@ -84,7 +85,19 @@ void configPLL(PLL_Config_t *ptrhandlerPLL){
 
 }
 
-//Función que entrega la frecuencia en MHz
+/* Función que selecciona la señal de reloj */
+void updateClock(PLL_Config_t *ptrhandlerPLL, uint8_t clock){
+
+	RCC->CFGR = (clock << RCC_CFGR_MCO1_Pos);
+}
+
+/* Función que configura el preescaler de la señal elegida */
+void updatePreescaler(PLL_Config_t *ptrhandlerPLL, uint8_t preescaler){
+
+	RCC->CFGR = (preescaler << RCC_CFGR_MCO1PRE_Pos);
+}
+
+/* Función que entrega la frecuencia en MHz */
 uint16_t getConfigPLL(void){
 
 	//Guarda el valor de los registros en las variables
