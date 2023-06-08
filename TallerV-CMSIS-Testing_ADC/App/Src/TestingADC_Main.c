@@ -34,12 +34,17 @@ uint8_t rxData = 0;
 char bufferData[64] = "Iniciando \n";
 
 /* Elementos para el Adc */
-ADC_Config_t handlerAdc						= {0};
-uint16_t dataADC = 0;
+ADC_Config_t handlerAdc	= {0};
 uint8_t adcIsComplete = 0;
+uint8_t adcCounter= 0;
+uint16_t dataADC[] = {0};
+
+
+#define numberOfChannels	2
 
 //Definición de las cabeceras de las funciones del main
 void initSystem(void);
+void ADC_ConfigMultichannel (ADC_Config_t *adcConfig, uint8_t numeroDeCanales);
 
 int main(void){
 
@@ -61,7 +66,7 @@ int main(void){
 
 		if(adcIsComplete == 1){
 
-			sprintf(bufferData, "data: %u /n", dataADC);
+			sprintf(bufferData,"%u\t%u\n",dataADC[0],dataADC[1]);
 			writeMsg(&usart2Comm, bufferData);
 
 			adcIsComplete = 0;
@@ -136,11 +141,17 @@ void initSystem(void){
 	USART_Config(&usart2Comm);
 
 	//Configuración ADC
-	handlerAdc.channel									= ADC_CHANNEL_0;
+	uint8_t channels[2] = {0};
+	channels[0] = ADC_CHANNEL_0;
+	channels[1] = ADC_CHANNEL_2;
+
 	handlerAdc.dataAlignment							= ADC_ALIGNMENT_RIGHT;
 	handlerAdc.samplingPeriod							= ADC_SAMPLING_PERIOD_84_CYCLES;
 	handlerAdc.resolution								= ADC_RESOLUTION_12_BIT;
+	handlerAdc.numberChannels						    = channels;
 	adc_Config(&handlerAdc);
+
+
 }
 
 void BasicTimer2_Callback(void){
@@ -152,8 +163,16 @@ void BasicTimer5_Callback(void){
 	startSingleADC();
 }
 
-void callback_extInt13(void){
-	__NOP();
+void adcComplete_Callback(void){
+
+	dataADC[adcCounter] = getADC();
+	if(adcCounter < (numberOfChannels-1)){
+		adcCounter++;
+	}
+	else{
+		adcIsComplete = 1;
+		adcCounter = 0;
+	}
 }
 
 /* Esta funcion se ejecuta cada vez que un caracter es recibido

@@ -13,6 +13,9 @@ uint16_t valuePllm = 0;
 uint16_t valuePllp = 2;
 uint16_t frecuencia = 0;
 
+uint8_t clock = 0;
+uint8_t preescaler = 0;
+
 /* Esta configuración es para 80 MHz */
 //Función para cargar la configuración de los registros
 void configPLL(PLL_Config_t *ptrhandlerPLL){
@@ -32,23 +35,33 @@ void configPLL(PLL_Config_t *ptrhandlerPLL){
 
 	RCC->PLLCFGR &= ~(RCC_PLLCFGR_PLLSRC); // HSI clock selected as PLL clock entry
 
-	/* Configuración de 100 MHz*/
+	/* Configuración LSE */
+	//Se habilita la señal del bus
+	RCC->APB1ENR &= ~(RCC_APB1ENR_PWREN);
+	RCC->APB1ENR |= RCC_APB1ENR_PWREN;
+
+	//Se quita la protección de los bits para modificar el LSE
+	PWR->CR &= ~(PWR_CR_DBP);
+	PWR->CR |= PWR_CR_DBP;
+
+	//Encendemos el LSE
+	RCC->BDCR &= ~(RCC_BDCR_LSEON);
+	RCC->BDCR |= RCC_BDCR_LSEON;
+
+	/* Configuración PLL (100 MHz)*/
 	//f(VCO clock) = 16 MHz * (PLLN/PLLM)
 
 	//Wait states to the Latency
 	FLASH->ACR  &= ~(FLASH_ACR_LATENCY);
 	FLASH->ACR |= (FLASH_ACR_LATENCY_3WS); //90 < HCLK ≤ 100
 
-	// PLLN = 100 MHz
 	RCC->PLLCFGR &= ~(RCC_PLLCFGR_PLLN);
 	RCC->PLLCFGR |= (ptrhandlerPLL->PLLN << RCC_PLLCFGR_PLLN_Pos);
 
-	// PLLM = 8 MHz
 	RCC->PLLCFGR &= ~(RCC_PLLCFGR_PLLM);
 	RCC->PLLCFGR |= (ptrhandlerPLL->PLLM << RCC_PLLCFGR_PLLM_Pos);
 
 	//f(Clock output) = f(VCO clock) / PLLP
-	//PLLP = 2 MHz
 	RCC->PLLCFGR &= ~(RCC_PLLCFGR_PLLP);
 	RCC->PLLCFGR |= (ptrhandlerPLL->PLLP << RCC_PLLCFGR_PLLP_Pos);
 
@@ -88,13 +101,19 @@ void configPLL(PLL_Config_t *ptrhandlerPLL){
 /* Función que selecciona la señal de reloj */
 void updateClock(PLL_Config_t *ptrhandlerPLL, uint8_t clock){
 
-	RCC->CFGR = (clock << RCC_CFGR_MCO1_Pos);
+	RCC->CFGR &= ~(RCC_CFGR_MCO1);
+
+	RCC->CFGR |= (clock << RCC_CFGR_MCO1_Pos);
 }
 
 /* Función que configura el preescaler de la señal elegida */
 void updatePreescaler(PLL_Config_t *ptrhandlerPLL, uint8_t preescaler){
 
-	RCC->CFGR = (preescaler << RCC_CFGR_MCO1PRE_Pos);
+
+	RCC->CFGR &= ~(RCC_CFGR_MCO1PRE);
+
+	RCC->CFGR |= (preescaler << RCC_CFGR_MCO1PRE_Pos);
+
 }
 
 /* Función que entrega la frecuencia en MHz */

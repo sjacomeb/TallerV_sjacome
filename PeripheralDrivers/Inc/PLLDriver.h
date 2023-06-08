@@ -15,10 +15,10 @@
 #define PLLP_6      2
 #define PLLP_8      3
 
-#define MCO1PRE_2   4   //division entre 2
-#define MCO1PRE_3   5   //division entre 3
-#define MCO1PRE_4   6   //division entre 4
-#define MCO1PRE_5   7   //division entre 5
+#define MCO1PRE_2   0b100   //division entre 2
+#define MCO1PRE_3   0b101   //division entre 3
+#define MCO1PRE_4   0b110   //division entre 4
+#define MCO1PRE_5   0b111   //division entre 5
 
 #define HSI_CLOCK       0
 #define LSE_OSCILLATOR  1

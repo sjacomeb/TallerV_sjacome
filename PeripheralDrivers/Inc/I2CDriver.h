@@ -17,6 +17,7 @@
 #define MAIN_CLOCK_16_MHz_FOR_I2C		16
 #define MAIN_CLOCK_20_MHz_FOR_I2C		20
 #define MAIN_CLOCK_80_MHz_FOR_I2C		80
+#define MAIN_CLOCK_100_MHz_FOR_I2C		100
 
 #define I2C_MODE_SM		0
 #define I2C_MODE_FM		1
@@ -54,6 +55,7 @@ void i2c_sendAck(I2C_Handler_t *ptrHandlerI2C);
 void i2c_sendNoAck(I2C_Handler_t *ptrHandlerI2C);
 
 uint8_t i2c_readSingleRegister(I2C_Handler_t *ptrHandlerI2C,uint8_t regToRead);
+void i2c_readMultiRegister(I2C_Handler_t *ptrHandlerI2C, uint8_t regToRead, uint8_t numberRegister, uint8_t auxReadString[numberRegister]);
 void i2c_writeSingleRegister(I2C_Handler_t *ptrHandlerI2C, uint8_t regToRead, uint8_t newValue);
 
 #endif /* I2CDRIVER_H_ */

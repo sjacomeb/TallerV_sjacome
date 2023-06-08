@@ -56,6 +56,7 @@ int main (void)
 	initSystem();
 //	i2c_writeSingleRegister(&Accelerometer, POWER_CTL , 0x2D);
 
+
 	//Imprimir un mensaje de inicio
 	writeMsg(&CommTerminal, bufferData);
 

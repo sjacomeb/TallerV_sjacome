@@ -120,9 +120,129 @@ void adc_Config(ADC_Config_t *adcConfig){
 
 /* Función multi-canal*/
 //La resolución y la alineación son iguales en todos los canales, cambia es el muestreo
+void ADC_ConfigMultichannel (ADC_Config_t *adcConfig, uint8_t numeroDeCanales){
 
+	/* 1. Configuramos el PinX para que cumpla la función de canal análogo deseado. */
+	for(uint8_t i=0 ; i<numeroDeCanales ; i++){
+		configAnalogPin(adcConfig->numberChannels[i]);
+	}
 
+	/* 2. Activamos la señal de reloj para el periférico ADC1 (bus APB2)*/
+	RCC ->APB2ENR |= RCC_APB2ENR_ADC1EN;
 
+	// Limpiamos los registros antes de comenzar a configurar
+	ADC1->CR1 = 0;
+	ADC1->CR2 = 0;
+
+	/* Comenzamos la configuración del ADC1 */
+	/* 3. Resolución del ADC */
+	switch(adcConfig->resolution){
+	case ADC_RESOLUTION_12_BIT:
+	{
+		// 0b00
+		ADC1->CR1 &= ~(ADC_CR1_RES_0);
+		ADC1 ->CR1 &= ~(ADC_CR1_RES_1);
+		break;
+	}
+
+	case ADC_RESOLUTION_10_BIT:
+	{
+		//0b01
+		ADC1 ->CR1 |= ADC_CR1_RES_0;
+		ADC1 ->CR1 &= ~(ADC_CR1_RES_1);
+		break;
+	}
+
+	case ADC_RESOLUTION_8_BIT:
+	{
+		//0b10
+		ADC1 ->CR1 &= ~(ADC_CR1_RES_0);
+		ADC1 ->CR1 |= ADC_CR1_RES_1;
+		break;
+	}
+
+	case ADC_RESOLUTION_6_BIT:
+	{
+		//0b11
+		ADC1->CR1 |= ADC_CR1_RES;
+
+		break;
+	}
+
+	default:
+	{
+		break;
+	}
+	}
+
+	/* 4. Configuramos el modo Scan como activado */
+	ADC1->CR1 |= (ADC_CR1_SCAN);
+
+	/* 5. Configuramos la alineación de los datos (derecha o izquierda) */
+	if(adcConfig->dataAlignment == ADC_ALIGNMENT_RIGHT){
+		// Alineación a la derecha (esta es la forma "natural")
+		ADC1->CR2 &= ~(ADC_CR2_ALIGN);
+	}
+	else{
+
+		// Alineación a la izquierda (para algunos cálculos matemáticos)
+		ADC1->CR2 |= ADC_CR2_ALIGN;
+	}
+
+	/* 6. Desactivamos el "continuos mode" */
+	ADC1->CR2 &= ~(ADC_CR2_CONT);
+
+	/* 7. Acá se debería configurar el sampling...*/
+
+	for(uint8_t i=0 ; i<numeroDeCanales ; i++){
+		if(adcConfig->channel <= ADC_CHANNEL_9){
+			ADC1->SMPR2 |= (adcConfig->samplingChannel[i] << (3* adcConfig->numberChannels[i]));
+		}
+		else{
+			ADC1->SMPR1 |= (adcConfig->samplingChannel[i] << (3* adcConfig->numberChannels[i]));
+		}
+	}
+
+	/* 8. Configuramos la secuencia y cuantos elementos hay en la secuencia */
+	ADC1->SQR1 = ((numeroDeCanales-1) << ADC_SQR1_L_Pos);
+
+	for(uint8_t i=0 ; i<numeroDeCanales ; i++){
+		if( i<= 5 ){
+
+			ADC1->SQR3 |= (adcConfig->numberChannels[i] << 5 * i);
+
+		}else if((i>5) & (i<=11)){
+
+			ADC1->SQR2 |= (adcConfig->numberChannels[i] << 5 * (i-6));
+
+		}else if(i<16){
+
+			ADC1->SQR1 |= (adcConfig->numberChannels[i] << 5 * (i-12));
+		}
+	}
+
+	/* 9. Configuramos el preescaler del ADC en 2:1 (el mas rápido que se puede tener */
+	ADC->CCR |= ADC_CCR_ADCPRE_0;
+
+	/* 10. Desactivamos las interrupciones globales */
+	__disable_irq();
+
+	/* 11. Activamos la interrupción debida a la finalización de una conversión EOC (CR1)*/
+	ADC1->CR1 |= ADC_CR1_EOCIE;
+
+	/* 11a. Matriculamos la interrupción en el NVIC*/
+	__NVIC_EnableIRQ(ADC_IRQn);
+
+	/* 11b. Configuramos la prioridad para la interrupción ADC */
+	NVIC_SetPriority(ADC_IRQn , 6);
+
+	/* 12. Activamos el modulo ADC */
+	ADC1->CR1 |= ADC_CR2_ADON;
+
+	/* 13. Activamos las interrupciones globales */
+	__enable_irq();
+
+}
 
 /*
  * Esta función lanza la conversion ADC y si la configuración es la correcta, solo se hace
@@ -132,7 +252,7 @@ void adc_Config(ADC_Config_t *adcConfig){
  *
  * */
 void startSingleADC(void){
-	/* Desactivamos el modo continuo de ADC */	//REVISAR
+	/* Desactivamos el modo continuo de ADC */
 	ADC1->CR2 &= ~(ADC_CR2_CONT);
 
 	/* Limpiamos el bit del overrun (CR1) */

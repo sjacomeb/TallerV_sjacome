@@ -51,7 +51,9 @@ typedef struct
 	uint8_t		resolution;		// Precisión con la que el ADC hace la adquisición del dato
 	uint16_t	samplingPeriod;	// Tiempo deseado para hacer la adquisición del dato
 	uint8_t		dataAlignment;	// Alineación a la izquierda o a la derecha
-	uint16_t	adcData;			//Dato de la conversión
+	uint16_t	adcData;		//Dato de la conversión
+	uint8_t *	samplingChannel; //Arreglo que guarda el sampling de cada canal
+	uint8_t *    numberChannels;	//Arreglo que guarda los canales ADC
 }ADC_Config_t;
 
 void adc_Config(ADC_Config_t *adcConfig);
@@ -59,8 +61,7 @@ void configAnalogPin(uint8_t adcChannel);
 void adcComplete_Callback(void);
 void startSingleADC(void);
 void startContinousADC(void);
+void ADC_ConfigMultichannel (ADC_Config_t *adcConfig, uint8_t numeroDeCanales);
 uint16_t getADC(void);
-
-//void ADC_ConfigMultichannel (ADC_Config_t *adcConfig, uint8_t numeroDeCanales);
 
 #endif /* ADCDRIVER_H_ */
