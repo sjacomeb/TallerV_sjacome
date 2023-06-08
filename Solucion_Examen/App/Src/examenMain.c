@@ -87,12 +87,12 @@ bool stringComplete = false;
 
 //Definición de las cabeceras de las funciones del main
 void initSystem(void);
-void comandos(char *ptrBufferReception);
 void dataAccel(void);
 
 int main(void){
 
 	//Inicializamos todos los elementos del sistema
+
 	initSystem();
 
 	/* Activamos el coprocesador matematico*/
@@ -102,17 +102,16 @@ int main(void){
 
 	writeMsg(&usartComm, "Funciona");
 
-	i2c_writeSingleRegister(&Accelerometer, POWER_CTL, 0x2D);
-
-	i2cBuffer = i2c_readSingleRegister(&Accelerometer,BW_RATE );
+	i2cBuffer = i2c_readSingleRegister(&Accelerometer,ACCEL_ADDRESS );
 	sprintf(bufferData, "data = 0x%x \n", (unsigned int)i2cBuffer);
 	writeMsg(&usartComm, bufferData);
 
 	while(1){
 
+
 		if(flag200Hz == 1){
 
-				i2c_readMultiRegister(&Accelerometer, ACCEL_XOUT_H, 6, accelData);
+			i2c_readMultiRegister(&Accelerometer, ACCEL_XOUT_H, 6, accelData);
 				AccelX = accelData[0] << 8 | accelData[1];
 				AccelY = accelData[2] << 8 | accelData[3];
 				AccelZ = accelData[4] << 8 | accelData[5];
@@ -126,9 +125,33 @@ int main(void){
 			ejeZAccel[contData] = AccelZ;
 		}
 
+//		if(flag200Hz == 1){
+//
+//			uint8_t AccelX_low =  i2c_readSingleRegister(&Accelerometer, ACCEL_XOUT_L);
+//			uint8_t AccelX_high = i2c_readSingleRegister(&Accelerometer, ACCEL_XOUT_H);
+//			AccelX = AccelX_high << 8 | AccelX_low;
+//
+//			uint8_t AccelY_low = i2c_readSingleRegister(&Accelerometer, ACCEL_YOUT_L);
+//			uint8_t AccelY_high = i2c_readSingleRegister(&Accelerometer,ACCEL_YOUT_H);
+//			AccelY = AccelY_high << 8 | AccelY_low;
+//
+//
+//			uint8_t AccelZ_low = i2c_readSingleRegister(&Accelerometer, ACCEL_ZOUT_L);
+//			uint8_t AccelZ_high = i2c_readSingleRegister(&Accelerometer, ACCEL_ZOUT_H);
+//			AccelZ = AccelZ_high << 8 | AccelZ_low;
+//
+//			flag200Hz = 0;
+//		}
+//
+//		if(contData < 256){
+//			ejeXAccel[contData] = AccelX;
+//			ejeYAccel[contData] = AccelY;
+//			ejeZAccel[contData] = AccelZ;
+//		}
+
+
 		if(rxData != '\0'){
 			writeChar(&usartComm, rxData);
-
 
 			if (rxData == 'x'){
 				sprintf(bufferData, "Axis X data (r) \n");
@@ -172,34 +195,6 @@ int main(void){
 
 	return 0;
 
-}
-
-//Muestrea los datos a un 200 Hz y los guarda en arreglos
-void dataAccel(void){
-
-//	if(flag200Hz == 1){
-//
-//		uint8_t AccelX_low =  i2c_readSingleRegister(&Accelerometer, ACCEL_XOUT_L);
-//		uint8_t AccelX_high = i2c_readSingleRegister(&Accelerometer, ACCEL_XOUT_H);
-//		AccelX = AccelX_high << 8 | AccelX_low;
-//
-//		uint8_t AccelY_low = i2c_readSingleRegister(&Accelerometer, ACCEL_YOUT_L);
-//		uint8_t AccelY_high = i2c_readSingleRegister(&Accelerometer,ACCEL_YOUT_H);
-//		AccelY = AccelY_high << 8 | AccelY_low;
-//
-//
-//		uint8_t AccelZ_low = i2c_readSingleRegister(&Accelerometer, ACCEL_ZOUT_L);
-//		uint8_t AccelZ_high = i2c_readSingleRegister(&Accelerometer, ACCEL_ZOUT_H);
-//		AccelZ = AccelZ_high << 8 | AccelZ_low;
-//
-//		flag200Hz = 0;
-//	}
-//
-//	if(contData < 256){
-//		ejeXAccel[contData] = AccelX;
-//		ejeYAccel[contData] = AccelY;
-//		ejeZAccel[contData] = AccelZ;
-//	}
 }
 
 void initSystem(void){

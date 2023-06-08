@@ -19,6 +19,7 @@
 #include "PLLDriver.h"
 #include "AdcDriver.h"
 #include "I2CDriver.h"
+#include "RTCDriver.h"
 
 #include "arm_math.h"
 
@@ -31,6 +32,7 @@ GPIO_Handler_t	handlerMuestreoPin			= {0};
 BasicTimer_Handler_t handlerBlinkyTimer 	= {0};
 BasicTimer_Handler_t handlerTimer_200Hz		= {0};
 PLL_Config_t pll							= {0};
+RTC_Config_t rtc							= {0};
 
 
 //Elementos para hacer la comunicación serial
@@ -65,30 +67,17 @@ I2C_Handler_t Accelerometer = {0};
 uint8_t i2cBuffer = {0};
 uint8_t accelData[] = {0};
 
-//Elementos para la transformada
-//float32_t fs = 8000.0;     //frecuencia de muestreo
-//float32_t f0 = 250.0;      //Frecuencia fundamental de la señal
-//float32_t dt = 0.0;        // Periodo de muestreo (1/fs)
-//float32_t stopTime = 1.0;
-//float32_t amplitud = 5;    //Amplitud de la señal generada
-//float32_t sineSignal[SINE_DATA_SIZE];
-//float32_t transformedSignal[SINE_DATA_SIZE];
-//float32_t *ptrSineSignal;
-//
-//uint32_t ifftFlag = 0;
-//uint32_t doBitReverse = 1;
-//arm_rfft_fast_instance_f32 config_Rfft_fast_f32;
-//arm_cfft_radix4_instance_f32 configRadix4_f32;
-//arm_status status = ARM_MATH_ARGUMENT_ERROR;
-//arm_status statusInitFFT = ARM_MATH_ARGUMENT_ERROR;
-//uint16_t fftSize = 1024;
+/* Elementos RTC*/
+uint8_t* valTime;
+uint8_t* valDate;
+uint8_t weekday = 0;
 
 /* Variables y arreglos*/
 char cmd[64];
 char userMsg[64];
-char bufferData[64] = {0};
 unsigned int firstParameter;
 unsigned int secondParameter;
+unsigned int thirdParameter;
 uint8_t counterReception = 0;
 bool stringComplete = false;
 
@@ -149,7 +138,7 @@ int main(void){
 
 void comandos(char *ptrBufferReception){
 
-	sscanf(ptrBufferReception, "%s %u %u %s", cmd, &firstParameter, &secondParameter, userMsg);
+	sscanf(ptrBufferReception, "%s %u %u %u", cmd, &firstParameter, &secondParameter,&thirdParameter);
 
 	//Este comando imprime una lista con los otros comandos que tiene el equipo
 	if(strcmp(cmd,"help") == 0){
@@ -157,8 +146,11 @@ void comandos(char *ptrBufferReception){
 		writeMsg(&usartComm, "Help Menu CMDs: \n");
 		writeMsg(&usartComm, "1) help           -- Imprime este menu \n");
 		writeMsg(&usartComm, "2) selectClock    -- Selecciona la señal: HSI=0, LSE=1, PLL=3 \n");
-		writeMsg(&usartComm, "3) selectPreescaler   --Selecciona preescaler: 2,3,4,5 \n");
-
+		writeMsg(&usartComm, "3) selectPreescaler  --Selecciona preescaler: 2,3,4,5 \n");
+		writeMsg(&usartComm, "4) readTime --Muestra la hora del sistema en formato 24hr (hora:min:seg)\n");
+		writeMsg(&usartComm, "5) readDate -- Muestra la fecha del sistema (dia/mes/año) \n");
+		writeMsg(&usartComm, "6) changeTime -- Cambia la hora del sistema (hora min) \n");
+		writeMsg(&usartComm, "7) changeDate -- Cambia la fecha del sistema (dia mes año) \n");
 	}
 	//Permite elegir la señal en el MCO1
 	else if(strcmp(cmd, "selectClock") == 0){
@@ -179,26 +171,58 @@ void comandos(char *ptrBufferReception){
 	else if(strcmp(cmd, "selectPreescaler") == 0){
 		if(firstParameter == 2){
 			updatePreescaler(&pll, MCO1PRE_2);
-			writeMsg(&usartComm, "Division by 2 \n");
+			writeMsg(&usartComm, "División de 2 \n");
 		}else if(firstParameter == 3){
 			updatePreescaler(&pll, MCO1PRE_3);
-			writeMsg(&usartComm, "Division by 3 \n");
+			writeMsg(&usartComm, "División de 3 \n");
 		}else if(firstParameter == 4){
 			updatePreescaler(&pll, MCO1PRE_4 );
-			writeMsg(&usartComm, "Division by 4 \n");
+			writeMsg(&usartComm, "División de 4 \n");
 		}else if(firstParameter == 5){
 			updatePreescaler(&pll, MCO1PRE_5);
-			writeMsg(&usartComm, "Division by 5 \n");
+			writeMsg(&usartComm, "División de 5 \n");
 		}else{
-			writeMsg(&usartComm, "Wrong parameter \n");
+			writeMsg(&usartComm, "Parámetro erróneo \n");
 		}
-
-
+	}
+	//Muestra la hora
+	else if(strcmp(cmd, "readTime") == 0){
+		valTime = readTime();
+		writeMsg(&usartComm, "Hora actual ");
+		sprintf(userMsg, "%d:%d:%d \n",valTime[0],valTime[1],valTime[2]);
+		writeMsg(&usartComm,userMsg);
+	}
+	//Muestra la fecha
+	else if(strcmp(cmd, "readDate") == 0){
+		valDate = readDate();
+		writeMsg(&usartComm, "Fecha actual ");
+		sprintf(userMsg, "%d/%d/%d \n",valDate[0],valDate[1],valDate[2]);
+		writeMsg(&usartComm,userMsg);
+	}
+	//Permite cambiar la hora
+	else if(strcmp(cmd, "changeTime") == 0){
+		if (firstParameter <=24 && secondParameter <60){
+			changeTime(&rtc, firstParameter, secondParameter);
+			writeMsg(&usartComm, "Hora cambiada \n");
+		}else{
+			writeMsg(&usartComm, "Parámetros erróneos \n");
+		}
+	}
+	//Permite cambiar la hora
+	else if(strcmp(cmd, "changeDate") == 0){
+		if (firstParameter <=31 && secondParameter <=12 ){
+			changeDate(&rtc, firstParameter, secondParameter, thirdParameter);
+			writeMsg(&usartComm, "Fecha cambiada \n");
+		}else{
+			writeMsg(&usartComm, "Parámetros erróneos \n");
+		}
 	}
 	else{
 		writeMsg(&usartComm, "Wrong CMD \n");
 	}
 }
+
+
 
 
 void initSystem(void){
@@ -300,6 +324,16 @@ void initSystem(void){
 	pll.PLLM			= 8;
 	pll.PLLP			= PLLP_2;
 	pll.MC01PRE			= MCO1PRE_2;
+
+	/* Configuración RTC */
+	rtc.seconds			= 0;
+	rtc.minutes			= 0;
+	rtc.hour			= 0;
+	rtc.day				= 5;
+	rtc.month			= 1;
+	rtc.year			= 23;
+	RTC_config(&rtc);
+
 
 }
 
