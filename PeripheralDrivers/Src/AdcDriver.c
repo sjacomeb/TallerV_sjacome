@@ -424,7 +424,7 @@ void configAnalogPin(uint8_t adcChannel) {
 	GPIO_Config(&handlerAdcPin);
 }
 
-void muestreoADC(uint8_t numero){
+void eventADC(uint8_t numero){
 
 	//Trigger detection on the rising edge
 	ADC1->CR2 &= ~(ADC_CR2_EXTEN);

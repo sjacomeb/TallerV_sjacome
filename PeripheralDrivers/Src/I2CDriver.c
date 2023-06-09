@@ -206,18 +206,21 @@ void i2c_readMultiRegister(I2C_Handler_t *ptrHandlerI2C, uint8_t regToRead, uint
 	/* 7. Lectura de los datos que envia el esclavo hasta el penúltimo dato*/
 	for(uint8_t i=0 ; i< numberRegister; i++){
 
-		auxReadString[i] = i2c_readDataByte(ptrHandlerI2C);
+		if(i == numberRegister-1){
 
+			/* 8. Generamos la condición de NoAck, para que el Master no repsonda y el slave solo envie 1 byte */
+			i2c_sendNoAck(ptrHandlerI2C);
+
+			/* 9.Generamos la condición Stop, para que el slave se detenga después de 1 byte */
+			i2c_stopTransaction(ptrHandlerI2C);
+
+			//Lectura de los datos hasta el penúltimo
+			auxReadString[i] = i2c_readDataByte(ptrHandlerI2C);
+		}else{
+			/* 10. Lectura de último dato */
+			auxReadString[i] = i2c_readDataByte(ptrHandlerI2C);
+		}
 	}
-	/* 8. Generamos la condición de NoAck, para que el Master no repsonda y el slave solo envie 1 byte */
-	i2c_sendNoAck(ptrHandlerI2C);
-
-	/* 9.Generamos la condición Stop, para que el slave se detenga después de 1 byte */
-	i2c_stopTransaction(ptrHandlerI2C);
-
-	/* 10. Lectura de último dato */
-	auxReadString[numberRegister - 1] = i2c_readDataByte(ptrHandlerI2C);
-
 }
 
 /* Leer un registro */

@@ -64,44 +64,22 @@ uint16_t adcCounter = 0;
 uint8_t val = 1;
 uint16_t dataAdcCH1[256] = {0};
 uint16_t dataAdcCH2[256] = {0};
-#define numberOfChannels	2
 
 /* Elementos Acelerometro */
 uint8_t flag200Hz = 0;
-uint8_t flag2seg = 0;
-uint16_t contData = 0;
+uint8_t flagFFT = 0;
 int16_t AccelX = 0 ;
 int16_t AccelY = 0 ;
 int16_t AccelZ = 0;
+uint16_t contAccel = 0;
 uint64_t ejeXAccel[256];
 uint64_t ejeYAccel[256];
 uint64_t ejeZAccel[256];
-
 int32_t  accelXData[ACCEL_DATA_SIZE];
 int32_t  accelYData[ACCEL_DATA_SIZE];
 float32_t  accelZData[ACCEL_DATA_SIZE];
 uint8_t  accelData[6];
 float32_t transformedAccelZ[ACCEL_DATA_SIZE];
-uint8_t  flagData = 0;
-uint16_t i = 0;
-uint8_t flagFFT = 0;
-
-/* FFT */
-float32_t fs = 8000.0;     //frecuencia de muestreo
-float32_t f0 = 250.0;      //Frecuencia fundamental de la señal
-float32_t dt = 0.0;        // Periodo de muestreo (1/fs)
-float32_t stopTime = 1.0;
-float32_t amplitud = 5;    //Amplitud de la señal generada
-//float32_t sineSignal[SINE_DATA_SIZE];
-//float32_t transformedSignal[SINE_DATA_SIZE];
-float32_t *ptrSineSignal;
-uint32_t ifftFlag = 0;
-uint32_t doBitReverse = 1;
-arm_rfft_fast_instance_f32 config_Rfft_fast_f32;
-arm_cfft_radix4_instance_f32 configRadix4_f32;
-arm_status status = ARM_MATH_ARGUMENT_ERROR;
-arm_status statusInitFFT = ARM_MATH_ARGUMENT_ERROR;
-uint16_t fftSize = 1024;
 
 /* Elementos para el I2C */
 GPIO_Handler_t I2cSDA = {0};
@@ -129,23 +107,42 @@ unsigned int thirdParameter;
 uint8_t counterReception = 0;
 bool stringComplete = false;
 
+/* FFT */
+float32_t fs = 8000.0;     //frecuencia de muestreo
+float32_t f0 = 250.0;      //Frecuencia fundamental de la señal
+float32_t dt = 0.0;        // Periodo de muestreo (1/fs)
+float32_t stopTime = 1.0;
+float32_t amplitud = 5;    //Amplitud de la señal generada
+//float32_t sineSignal[SINE_DATA_SIZE];
+//float32_t transformedSignal[SINE_DATA_SIZE];
+float32_t *ptrSineSignal;
+uint32_t ifftFlag = 0;
+uint32_t doBitReverse = 1;
+arm_rfft_fast_instance_f32 config_Rfft_fast_f32;
+arm_cfft_radix4_instance_f32 configRadix4_f32;
+arm_status status = ARM_MATH_ARGUMENT_ERROR;
+arm_status statusInitFFT = ARM_MATH_ARGUMENT_ERROR;
+uint16_t fftSize = 1024;
+
 //Definición de las cabeceras de las funciones del main
 void initSystem(void);
 void comandos(char *ptrBufferReception);
 void dataADC(void);
-//void dataAccel(void);
+void dataAccel(void);
 
 int main(void){
 
 	//Inicializamos todos los elementos del sistema
 	initSystem();
 
+	/* Activamos la configuración de la frecuencia microcontrolador */
 	configPLL(&pll);
 
 	/* Activamos el coprocesador matematico*/
 	SCB->CPACR |= (0xF << 20);
 
-	muestreoADC(9);
+	/* Activamos la función que descencadena el inicio de la conversión ADC */
+	eventADC(9);
 
 //	i2cBuffer = i2c_readSingleRegister(&Accelerometer, WHO_AM_I);
 //	sprintf(userMsg, "dataRead = 0x%x \n", (unsigned int) i2cBuffer);
@@ -156,17 +153,6 @@ int main(void){
 //	writeMsg(&usartComm,userMsg);
 
 	while(1){
-
-		if(AdcIsComplete == 1){
-			stopPwmSignal(&handlerSignalPWM);
-			// Enviamos los datos por consola
-			for(uint8_t i = 0; i<256 ; i++){
-				sprintf(userMsg,"dato %u: %u , %u \n",i,dataAdcCH1[i],dataAdcCH2[i]);
-				writeMsg(&usartComm, userMsg);
-			}
-			// Bajamos la bandera del ADC
-			AdcIsComplete = 0;
-		}
 
 //		//Prueba transformada
 //		if(flagFFT == 1 ){
@@ -321,7 +307,7 @@ void comandos(char *ptrBufferReception){
 	}
 	//Imprime los datos de los dos canales de la conversión ADC
 	else if(strcmp(cmd, "dataADC") == 0){
-		writeMsg(&usartComm, "Datos de la conversión ADC : dato : canal 1, canal 2 ");
+		writeMsg(&usartComm, "Datos de la conversión ADC \n dato : canal 1, canal 2 \n");
 		dataADC();
 	}
 	else{
@@ -331,42 +317,47 @@ void comandos(char *ptrBufferReception){
 
 void dataADC(void){
 
-
+	if(AdcIsComplete == 1){
+		stopPwmSignal(&handlerSignalPWM);
+		// Enviamos los datos por consola
+		for(uint16_t i = 0; i<256 ; i++){
+			sprintf(userMsg,"dato %u: %u , %u \n",i,dataAdcCH1[i],dataAdcCH2[i]);
+			writeMsg(&usartComm, userMsg);
+		}
+		// Bajamos la bandera del ADC
+		AdcIsComplete = 0;
+	}
 }
 
 //Muestrea los datos a un 200Hz y los guarda en arreglos
-//void dataAccel(void){
-//
-//	if(flag200Hz == 1){
-//
-//		uint8_t AccelX_low =  i2c_readSingleRegister(&Accelerometer, ACCEL_XOUT_L);
-//		uint8_t AccelX_high = i2c_readSingleRegister(&Accelerometer, ACCEL_XOUT_H);
-//		AccelX = AccelX_high << 8 | AccelX_low;
-//
-//		uint8_t AccelY_low = i2c_readSingleRegister(&Accelerometer, ACCEL_YOUT_L);
-//		uint8_t AccelY_high = i2c_readSingleRegister(&Accelerometer,ACCEL_YOUT_H);
-//		AccelY = AccelY_high << 8 | AccelY_low;
-//
-//		uint8_t AccelZ_low = i2c_readSingleRegister(&Accelerometer, ACCEL_ZOUT_L);
-//		uint8_t AccelZ_high = i2c_readSingleRegister(&Accelerometer, ACCEL_ZOUT_H);
-//		AccelZ = AccelZ_high << 8 | AccelZ_low;
-//
-//		flag200Hz = 0;
-//	}
-//
-//	if(contData < 256){
-//		ejeXAccel[contData] = AccelX;
-//		ejeYAccel[contData] = AccelY;
-//		ejeZAccel[contData] = AccelZ;
-//	}
-//}
+void dataAccel(void){
 
+	if(flag200Hz == 1){
+		i2c_readMultiRegister(&Accelerometer, ACCEL_XOUT_H, 6, accelData);
+		AccelX = accelData[1] << 8 | accelData[0];
+		AccelY = accelData[3] << 8 | accelData[2];
+		AccelZ = accelData[5] << 8 | accelData[4];
+
+		if(contAccel < ACCEL_DATA_SIZE){
+			accelXData[contAccel] = AccelX;
+			accelYData[contAccel] = AccelY;
+			accelZData[contAccel] = AccelZ;
+			contAccel++;
+		} else {
+			contAccel=0;
+			flagFFT = 1;
+		}
+
+		flag200Hz = 0;
+	}
+
+}
 
 void initSystem(void){
 
 	/* Configuración del pin para el Led_Blinky */
-	handlerBlinkyPin.pGPIOx 								= GPIOA;
-	handlerBlinkyPin.GPIO_PinConfig.GPIO_PinNumber 			= PIN_5;
+	handlerBlinkyPin.pGPIOx 								= GPIOH;
+	handlerBlinkyPin.GPIO_PinConfig.GPIO_PinNumber 			= PIN_1;
 	handlerBlinkyPin.GPIO_PinConfig.GPIO_PinMode 			= GPIO_MODE_OUT;
 	handlerBlinkyPin.GPIO_PinConfig.GPIO_PinOType			= GPIO_OTYPE_PUSHPULL;
 	handlerBlinkyPin.GPIO_PinConfig.GPIO_PinSpeed			= GPIO_OSPEED_FAST;
@@ -487,7 +478,7 @@ void initSystem(void){
 	handlerPinPwmChannel.GPIO_PinConfig.GPIO_PinOType		= GPIO_OTYPE_PUSHPULL;
 	handlerPinPwmChannel.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
 	handlerPinPwmChannel.GPIO_PinConfig.GPIO_PinSpeed		= GPIO_OSPEED_FAST;
-	handlerPinPwmChannel.GPIO_PinConfig.GPIO_PinAltFunMode	= AF1;
+	handlerPinPwmChannel.GPIO_PinConfig.GPIO_PinAltFunMode	= AF2;
 	GPIO_Config(&handlerPinPwmChannel);
 
 	/* Configurando el Timer para que genere la señal PWM*/
@@ -512,18 +503,9 @@ void BasicTimer2_Callback(void){
 
 //Timer para el muestreo Acelerometro
 void BasicTimer5_Callback(void){
-	GPIOxTooglePin(&handlerMuestreoPin);
-
-	if(contData < 256){
-		contData++;
-
-		flag2seg = 1;
-	}
-	else{
-		contData = 0;
-	}
 
 	flag200Hz = 1;
+
 }
 
 void usart1Rx_Callback(void){

@@ -80,6 +80,6 @@ void startSingleADC(void);
 void startContinousADC(void);
 void ADC_ConfigMultichannel (ADC_Config_t *adcConfig);
 uint16_t getADC(void);
-void muestreoADC(uint8_t numero);
+void eventADC(uint8_t numero);
 
 #endif /* ADCDRIVER_H_ */
