@@ -44,7 +44,6 @@ uint16_t dataADC[] = {0};
 
 //Definición de las cabeceras de las funciones del main
 void initSystem(void);
-void ADC_ConfigMultichannel (ADC_Config_t *adcConfig, uint8_t numeroDeCanales);
 
 int main(void){
 
@@ -139,18 +138,6 @@ void initSystem(void){
 	usart2Comm.USART_Config.USART_enableIntTX				= USART_TX_INTERRUPT_DISABLE; //los datos de las funciones sin interrupciones
 
 	USART_Config(&usart2Comm);
-
-	//Configuración ADC
-	uint8_t channels[2] = {0};
-	channels[0] = ADC_CHANNEL_0;
-	channels[1] = ADC_CHANNEL_2;
-
-	handlerAdc.dataAlignment							= ADC_ALIGNMENT_RIGHT;
-	handlerAdc.samplingPeriod							= ADC_SAMPLING_PERIOD_84_CYCLES;
-	handlerAdc.resolution								= ADC_RESOLUTION_12_BIT;
-	handlerAdc.numberChannels						    = channels;
-	adc_Config(&handlerAdc);
-
 
 }
 

@@ -134,7 +134,12 @@ void BasicTimer_Config(BasicTimer_Handler_t *ptrBTimerHandler){
 	__enable_irq();
 }
 
-
+__attribute__((weak)) void BasicTimer1_Callback(void){
+	  /* NOTE : This function should not be modified, when the callback is needed,
+	            the BasicTimerX_Callback could be implemented in the main file
+	   */
+	__NOP();
+}
 
 __attribute__((weak)) void BasicTimer2_Callback(void){
 	  /* NOTE : This function should not be modified, when the callback is needed,

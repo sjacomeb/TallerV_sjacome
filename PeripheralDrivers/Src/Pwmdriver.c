@@ -201,6 +201,14 @@ void updateFrequency(PWM_Handler_t *ptrPwmHandler, uint16_t newFreq){
 	setFrequency(ptrPwmHandler);
 }
 
+/* Función para actualizar el periodo */
+void updatePeriod(PWM_Handler_t *ptrPwmHandler, uint16_t newPeriod){
+
+	// Actualizamos el registro que manipula el periodo
+	ptrPwmHandler->ptrTIMx->ARR = newPeriod;
+
+}
+
 /* El valor del dutty debe estar dado en valores de %, entre 0% y 100%*/
 void setDuttyCycle(PWM_Handler_t *ptrPwmHandler){
 
