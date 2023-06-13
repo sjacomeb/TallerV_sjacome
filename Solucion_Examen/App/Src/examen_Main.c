@@ -108,14 +108,7 @@ uint8_t counterReception = 0;
 bool stringComplete = false;
 
 /* FFT */
-float32_t fs = 8000.0;     //frecuencia de muestreo
-float32_t f0 = 250.0;      //Frecuencia fundamental de la señal
-float32_t dt = 0.0;        // Periodo de muestreo (1/fs)
 float32_t stopTime = 1.0;
-float32_t amplitud = 5;    //Amplitud de la señal generada
-//float32_t sineSignal[SINE_DATA_SIZE];
-//float32_t transformedSignal[SINE_DATA_SIZE];
-float32_t *ptrSineSignal;
 uint32_t ifftFlag = 0;
 uint32_t doBitReverse = 1;
 arm_rfft_fast_instance_f32 config_Rfft_fast_f32;
@@ -124,12 +117,17 @@ arm_status status = ARM_MATH_ARGUMENT_ERROR;
 arm_status statusInitFFT = ARM_MATH_ARGUMENT_ERROR;
 uint16_t fftSize = 1024;
 uint8_t flagS = 0;
+float factorConver = (4 * 9.78)/ (1000 * 256);
+float32_t freq = 0;
+float32_t maxValue = 0;
+uint32_t maxIndex = 0;
 
 //Definición de las cabeceras de las funciones del main
 void initSystem(void);
 void comandos(char *ptrBufferReception);
 void dataADC(void);
 void dataAccel(void);
+void frecuenciaFFT(void);
 
 int main(void){
 
@@ -145,17 +143,11 @@ int main(void){
 	/* Activamos la función que descencadena el inicio de la conversión ADC */
 	eventADC(9);
 
-//	i2cBuffer = i2c_readSingleRegister(&Accelerometer, WHO_AM_I);
-//	sprintf(userMsg, "dataRead = 0x%x \n", (unsigned int) i2cBuffer);
-//	writeMsg(&usartComm, userMsg);
-//
-//	statusInitFFT = arm_rfft_fast_init_f32(&config_Rfft_fast_f32, fftSize);
-//	sprintf(userMsg, "Initialization... SUCCESS! \n");
-//	writeMsg(&usartComm,userMsg);
 
 	while(1){
+
 		//Creamos una cadena de caracteres con los datos que llegan
-				//El caracter '*' indica el final de la cadena
+		//El caracter '*' indica el final de la cadena
 		if(rxData != '\0'){
 			bufferReception[counterReception] = rxData;
 			counterReception++;
@@ -175,42 +167,6 @@ int main(void){
 			comandos(bufferReception);
 			stringComplete = false;
 		}
-
-
-		//Prueba transformada
-		if(flagFFT == 1 && flagS==1 ){
-
-
-			int i = 0;
-			int j = 0;
-
-			sprintf(userMsg, "FFT \n");
-			writeMsg(&usartComm, userMsg);
-
-			if(statusInitFFT == ARM_MATH_SUCCESS){
-				arm_rfft_fast_f32(&config_Rfft_fast_f32, accelZData, transformedAccelZ, ifftFlag);
-
-				for(i=1; i< fftSize; i++){
-					if(i % 2){
-						sprintf(userMsg, "%u ; %#.6f \n", j, accelZData[j]);
-						writeMsg(&usartComm, userMsg);
-						j++;
-					}
-				}
-
-			}
-			else {
-				writeMsg(&usartComm, "FFT not Initialized..,");
-			}
-			//Bajar bandera FFT
-			flagFFT = 0;
-			flagS = 0;
-		}
-
-
-
-
-
 	}
 
 	return 0;
@@ -234,7 +190,8 @@ void comandos(char *ptrBufferReception){
 		writeMsg(&usartComm, "7) changeDate -- Cambia la fecha del sistema (dia mes año) \n");
 		writeMsg(&usartComm, "8) changePeriod -- Cambia el periodo de la señal PWM. Rango: 8000-20000 Hz \n");
 		writeMsg(&usartComm, "9) dataADC -- Muestra los datos de la conversión ADC de los dos canales \n");
-		writeMsg(&usartComm, "10) ActivarFFT -- Se activa la FFT \n");
+		writeMsg(&usartComm, "10) activarFFT -- Activa la FFT \n");
+		writeMsg(&usartComm, "11) frecuenciaFFT -- Muestra la frecuancia obtenida de la FFT \n");
 	}
 	//Permite elegir la señal en el MCO1
 	else if(strcmp(cmd, "selectClock") == 0){
@@ -285,7 +242,7 @@ void comandos(char *ptrBufferReception){
 	}
 	//Permite cambiar la hora
 	else if(strcmp(cmd, "changeTime") == 0){
-		if (firstParameter <=24 && secondParameter <60){
+		if (firstParameter <=24 && secondParameter <60 && firstParameter >0 && secondParameter >0){
 			changeTime(&rtc, firstParameter, secondParameter);
 			writeMsg(&usartComm, "Hora cambiada \n");
 		}else{
@@ -294,7 +251,7 @@ void comandos(char *ptrBufferReception){
 	}
 	//Permite cambiar la hora
 	else if(strcmp(cmd, "changeDate") == 0){
-		if (firstParameter <=31 && secondParameter <=12 ){
+		if (firstParameter <=31 && secondParameter <=12 && firstParameter >0 && secondParameter >0 && thirdParameter >0 && thirdParameter <=99){
 			changeDate(&rtc, firstParameter, secondParameter, thirdParameter);
 			writeMsg(&usartComm, "Fecha cambiada \n");
 		}else{
@@ -316,18 +273,65 @@ void comandos(char *ptrBufferReception){
 		writeMsg(&usartComm, "Datos de la conversión ADC \n dato : canal 1, canal 2 \n");
 		dataADC();
 	}
-	else if(strcmp(cmd, "ActivarFFT") == 0){
+	//Realiza la FFT de los datos del acelerometro
+	else if(strcmp(cmd, "activarFFT") == 0){
 		flagS=1;
 		statusInitFFT = arm_rfft_fast_init_f32(&config_Rfft_fast_f32, fftSize);
-		sprintf(userMsg, "Initialization... SUCCESS! \n");
+		sprintf(userMsg, "Inicialización FFT exitosa \n");
 		writeMsg(&usartComm, userMsg);
 
-		}
+	}
+	//Muestra la frecuencia de la FFT
+	else if(strcmp(cmd, "frecuenciaFFT") == 0){
+		writeMsg(&usartComm,"Frecuencia:");
+		frecuenciaFFT();
+	}
 	else{
 		writeMsg(&usartComm, "Wrong CMD \n");
 	}
 }
 
+//Transformada de Fourier
+void frecuenciaFFT(void){
+	if(flagFFT == 1 && flagS==1 ){
+
+		int i = 0;
+		int j = 0;
+
+		sprintf(userMsg, "FFT \n");
+		writeMsg(&usartComm, userMsg);
+
+		if(statusInitFFT == ARM_MATH_SUCCESS){
+			arm_rfft_fast_f32(&config_Rfft_fast_f32, accelZData, transformedAccelZ, ifftFlag);
+
+			for(i=1; i< fftSize; i++){
+				if(i % 2){
+					sprintf(userMsg, "%u ; %#.6f \n", j, accelZData[j]);
+					writeMsg(&usartComm, userMsg);
+					j++;
+				}
+			}
+
+			arm_absmax_f32(accelZData, fftSize, &maxValue, &maxIndex);
+			arm_max_f32(accelZData, fftSize, &maxValue, &maxIndex);
+
+			//Se realiza una operación para convertir el contador en un valor de
+			//frecuencia. Mostrando la frecuencia dominante
+
+			freq = (maxIndex *200)/(fftSize);
+			sprintf(userMsg, "Frecuencia dominate: %#.4f Hz \n", freq);
+			writeMsg(&usartComm, userMsg);
+		}
+		else {
+			writeMsg(&usartComm, "FFT not Initialized..,");
+		}
+		//Bajar bandera FFT
+		flagFFT = 0;
+		flagS = 0;
+	}
+}
+
+//Imprime los datos de la conversión ADC
 void dataADC(void){
 
 	if(AdcIsComplete == 1){
@@ -346,6 +350,7 @@ void dataADC(void){
 void dataAccel(void){
 
 	if(flag200Hz == 1){
+
 		i2c_readMultiRegister(&Accelerometer, ACCEL_XOUT_H, 6, accelData);
 		AccelX = accelData[1] << 8 | accelData[0];
 		AccelY = accelData[3] << 8 | accelData[2];
@@ -354,7 +359,7 @@ void dataAccel(void){
 		if(contAccel < ACCEL_DATA_SIZE){
 			accelXData[contAccel] = AccelX;
 			accelYData[contAccel] = AccelY;
-			accelZData[contAccel] = AccelZ;
+			accelZData[contAccel] = AccelZ*factorConver;
 			contAccel++;
 		} else {
 			contAccel=0;
@@ -509,6 +514,7 @@ void initSystem(void){
 
 }
 
+//Timer blinky led de estado
 void BasicTimer2_Callback(void){
 	GPIOxTooglePin(&handlerBlinkyPin);
 }
@@ -521,11 +527,13 @@ void BasicTimer5_Callback(void){
 
 }
 
+//Interrupción USART
 void usart1Rx_Callback(void){
 
 	rxData = getRxData();
 }
 
+//Interrupcion ADC
 void adcComplete_Callback(void){
 
 	if(val == 1){
@@ -542,6 +550,5 @@ void adcComplete_Callback(void){
 		adcCounter = 0;
 	}
 	val^=1;
-
 
 }
