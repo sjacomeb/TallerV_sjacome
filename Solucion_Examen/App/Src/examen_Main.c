@@ -123,6 +123,7 @@ arm_cfft_radix4_instance_f32 configRadix4_f32;
 arm_status status = ARM_MATH_ARGUMENT_ERROR;
 arm_status statusInitFFT = ARM_MATH_ARGUMENT_ERROR;
 uint16_t fftSize = 1024;
+uint8_t flagS = 0;
 
 //Definición de las cabeceras de las funciones del main
 void initSystem(void);
@@ -153,39 +154,8 @@ int main(void){
 //	writeMsg(&usartComm,userMsg);
 
 	while(1){
-
-//		//Prueba transformada
-//		if(flagFFT == 1 ){
-//
-//			stopTime = 0.0;
-//			int i = 0;
-//			int j = 0;
-//
-//			sprintf(userMsg, "FFT \n");
-//			writeMsg(&usartComm, userMsg);
-//
-//			if(statusInitFFT == ARM_MATH_SUCCESS){
-//				arm_rfft_fast_f32(&config_Rfft_fast_f32, accelZData, transformedAccelZ, ifftFlag);
-//
-//				for(i=1; i< fftSize; i++){
-//					if(i % 2){
-//						sprintf(userMsg, "%u ; %#.6f \n", j, transformedAccelZ[j]);
-//						writeMsg(&usartComm, userMsg);
-//						j++;
-//					}
-//				}
-//
-//			}
-//			else {
-//				writeMsg(&usartComm, "FFT not Initialized..,");
-//			}
-//			//Bajar bandera FFT
-//			flagFFT = 0;
-//		}
-
-
 		//Creamos una cadena de caracteres con los datos que llegan
-		//El caracter '*' indica el final de la cadena
+				//El caracter '*' indica el final de la cadena
 		if(rxData != '\0'){
 			bufferReception[counterReception] = rxData;
 			counterReception++;
@@ -205,6 +175,41 @@ int main(void){
 			comandos(bufferReception);
 			stringComplete = false;
 		}
+
+
+		//Prueba transformada
+		if(flagFFT == 1 && flagS==1 ){
+
+
+			int i = 0;
+			int j = 0;
+
+			sprintf(userMsg, "FFT \n");
+			writeMsg(&usartComm, userMsg);
+
+			if(statusInitFFT == ARM_MATH_SUCCESS){
+				arm_rfft_fast_f32(&config_Rfft_fast_f32, accelZData, transformedAccelZ, ifftFlag);
+
+				for(i=1; i< fftSize; i++){
+					if(i % 2){
+						sprintf(userMsg, "%u ; %#.6f \n", j, accelZData[j]);
+						writeMsg(&usartComm, userMsg);
+						j++;
+					}
+				}
+
+			}
+			else {
+				writeMsg(&usartComm, "FFT not Initialized..,");
+			}
+			//Bajar bandera FFT
+			flagFFT = 0;
+			flagS = 0;
+		}
+
+
+
+
 
 	}
 
@@ -229,6 +234,7 @@ void comandos(char *ptrBufferReception){
 		writeMsg(&usartComm, "7) changeDate -- Cambia la fecha del sistema (dia mes año) \n");
 		writeMsg(&usartComm, "8) changePeriod -- Cambia el periodo de la señal PWM. Rango: 8000-20000 Hz \n");
 		writeMsg(&usartComm, "9) dataADC -- Muestra los datos de la conversión ADC de los dos canales \n");
+		writeMsg(&usartComm, "10) ActivarFFT -- Se activa la FFT \n");
 	}
 	//Permite elegir la señal en el MCO1
 	else if(strcmp(cmd, "selectClock") == 0){
@@ -310,6 +316,13 @@ void comandos(char *ptrBufferReception){
 		writeMsg(&usartComm, "Datos de la conversión ADC \n dato : canal 1, canal 2 \n");
 		dataADC();
 	}
+	else if(strcmp(cmd, "ActivarFFT") == 0){
+		flagS=1;
+		statusInitFFT = arm_rfft_fast_init_f32(&config_Rfft_fast_f32, fftSize);
+		sprintf(userMsg, "Initialization... SUCCESS! \n");
+		writeMsg(&usartComm, userMsg);
+
+		}
 	else{
 		writeMsg(&usartComm, "Wrong CMD \n");
 	}
