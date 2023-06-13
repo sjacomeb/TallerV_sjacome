@@ -283,7 +283,6 @@ void comandos(char *ptrBufferReception){
 	}
 	//Muestra la frecuencia de la FFT
 	else if(strcmp(cmd, "frecuenciaFFT") == 0){
-		writeMsg(&usartComm,"Frecuencia:");
 		frecuenciaFFT();
 	}
 	else{
