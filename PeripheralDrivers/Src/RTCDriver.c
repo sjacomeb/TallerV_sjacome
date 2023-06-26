@@ -106,7 +106,7 @@ uint8_t *readTime(void){
 
 	tiempo[0] = bcdToDec((RTC->TR >> RTC_TR_HU_Pos) & 0b111111);
 	tiempo[1] = bcdToDec((RTC->TR >> RTC_TR_MNU_Pos)& 0b1111111);
-	tiempo[2] = bcdToDec((RTC->TR>> RTC_TR_SU_Pos) & 0b1111111);
+	tiempo[2] = bcdToDec((RTC->TR >> RTC_TR_SU_Pos) & 0b1111111);
 
 	return tiempo;
 }

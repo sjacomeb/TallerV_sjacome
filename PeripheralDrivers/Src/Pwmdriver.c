@@ -115,6 +115,40 @@ void pwm_Config(PWM_Handler_t *ptrPwmHandler){
 	enableOutput(ptrPwmHandler);
 
 	}// fin del switch-case
+
+
+	/* 5.0 Desactivo primero las interrupciones globales */
+	__disable_irq();
+
+	/* 5. Activamos la interrupción debida al Timerx Utilizado
+	 * Modificar el registro encargado de activar la interrupcion generada por el TIMx*/
+
+	//Primero habilitar el UIE
+	ptrPwmHandler ->ptrTIMx ->DIER |= SET;
+
+	/* 6. Activamos el canal del sistema NVIC para que lea la interrupción*/
+	if(ptrPwmHandler->ptrTIMx == TIM2){
+		// Activando en NVIC para la interrupción del TIM2
+		NVIC_EnableIRQ(TIM2_IRQn);
+	}
+	else if(ptrPwmHandler->ptrTIMx == TIM3){
+		// Activando en NVIC para la interrupción del TIM3
+		NVIC_EnableIRQ(TIM3_IRQn);
+	}
+	else if (ptrPwmHandler->ptrTIMx == TIM4){
+		// Activando en NVIC para la interrupción del TIM4
+		NVIC_EnableIRQ(TIM4_IRQn);
+	}
+	else if(ptrPwmHandler->ptrTIMx == TIM5){
+		// Activando en NVIC para la interrupción del TIM5
+		NVIC_EnableIRQ(TIM5_IRQn);
+	}
+	else{
+		__NOP();
+	}
+
+	/* 7. Volvemos a activar las interrupciones del sistema */
+	__enable_irq();
 }
 
 /* Función para activar el Timer y activar todo el módulo PWM */

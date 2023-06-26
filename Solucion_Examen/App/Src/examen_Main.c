@@ -262,10 +262,10 @@ void comandos(char *ptrBufferReception){
 	else if(strcmp(cmd, "changePeriod") == 0){
 		if(firstParameter >= 50 && firstParameter <= 125){
 			updatePeriod(&handlerSignalPWM, firstParameter);
-			writeMsg(&usartComm, "Velocidad de muestreo de la conversión ADC cambiada");
+			writeMsg(&usartComm, "Velocidad de muestreo de la conversión ADC cambiada \n");
 		}
 		else{
-			writeMsg(&usartComm, "Parámetro erróneo");
+			writeMsg(&usartComm, "Parámetro erróneo \n");
 		}
 	}
 	//Imprime los datos de los dos canales de la conversión ADC
@@ -360,6 +360,7 @@ void dataAccel(void){
 			accelYData[contAccel] = AccelY;
 			accelZData[contAccel] = AccelZ*factorConver;
 			contAccel++;
+
 		} else {
 			contAccel=0;
 			flagFFT = 1;
@@ -542,8 +543,8 @@ void adcComplete_Callback(void){
 	else{
 		dataAdcCH2[adcCounter] = getADC();
 		adcCounter++;
-
 	}
+
 	if(adcCounter == 256){
 		AdcIsComplete = 1;
 		adcCounter = 0;

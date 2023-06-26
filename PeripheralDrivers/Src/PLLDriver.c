@@ -109,7 +109,6 @@ void updateClock(PLL_Config_t *ptrhandlerPLL, uint8_t clock){
 /* Función que configura el preescaler de la señal elegida */
 void updatePreescaler(PLL_Config_t *ptrhandlerPLL, uint8_t preescaler){
 
-
 	RCC->CFGR &= ~(RCC_CFGR_MCO1PRE);
 
 	RCC->CFGR |= (preescaler << RCC_CFGR_MCO1PRE_Pos);
