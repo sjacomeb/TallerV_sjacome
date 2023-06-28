@@ -24,10 +24,10 @@
 
 #include "arm_math.h"
 
-#define PASOS_360_MOTOR		300
-#define PASOS_270_MOTOR		175
-#define PASOS_180_MOTOR		150
-#define PASOS_90_MOTOR		75
+#define PASOS_360_MOTOR		200
+#define PASOS_270_MOTOR		150
+#define PASOS_180_MOTOR		100
+#define PASOS_90_MOTOR		50
 
 #define LCD_ADDRESS			0x26
 
@@ -205,6 +205,8 @@ void BasicTimer3_Callback(void) {
 	if(flagPosicionInicial == 1){
 
 		GPIO_WritePin(&handlerDireccion, 0);
+		startPwmSignal(&signalPwmMotor);
+
 		if (contadorMotor <= pasos) {
 			contadorMotor++;
 		}else {
@@ -212,7 +214,6 @@ void BasicTimer3_Callback(void) {
 			contadorMotor = 0;
 			flagPosicionInicial = 2;
 			GPIO_WritePin(&handlerDireccion, 1);
-			delay_ms(1000);
 			flagTerminado = 1;
 		}
 	}
