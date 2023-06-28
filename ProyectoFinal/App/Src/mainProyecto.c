@@ -78,11 +78,11 @@ uint8_t flagInterrupcion = 0;
 uint8_t pasos = 0;
 uint8_t sensorInductivo = 0;
 uint8_t sensorHumedad = 0;
+uint8_t direccion = 0;
 
 //Definición de las cabeceras de las funciones del main
 void initSystem(void);
 void mensajeInicio_LCD(void);
-void mensajeClasificacion(void);
 
 int main(void) {
 
@@ -103,34 +103,74 @@ int main(void) {
 			delay_ms(1000);
 
 			flagServo = 0;
-//			enableOutput(&signalPwmMotor);
+			startPwmSignal(&signalPwmMotor);
 			flagPosicionInicial = 1;
 
 		}
 
-//		if(flag3Sensores == 1){
-//			delay_ms(1000);
-//			enableOutput(&signalPwmServo);
-//			startPwmSignal(&signalPwmServo);
-//			updateDuttyCycle(&signalPwmServo, 2400);
-//			delay_ms(2000);
-//			updateDuttyCycle(&signalPwmServo, 600);
-//			delay_ms(1000);
-//
-//			flag3Sensores= 0;
-//			flagTerminado = 1;
-//		}
+		if(flag3Sensores == 1){
+			delay_ms(1000);
+			enableOutput(&signalPwmServo);
+			startPwmSignal(&signalPwmServo);
+			updateDuttyCycle(&signalPwmServo, 2400);
+			delay_ms(2000);
+			updateDuttyCycle(&signalPwmServo, 600);
+			delay_ms(1000);
 
-//		if(flagTerminado == 1){
-//			delay_ms(1000);
-//			lcd_i2c_init(&handlerLCD);
-//			delay_ms(10);
-//			lcd_i2c_gotoxy(&handlerLCD, 1, 0);
-//			lcd_i2c_putc(&handlerLCD, "Esperando residuo...");
-//			delay_ms(500);
-//
-//			flagTerminado = 0;
-//		}
+			flag3Sensores= 0;
+			flagTerminado = 1;
+		}
+
+		//Mensajes
+
+		if(flagTerminado == 1){
+			delay_ms(1000);
+			lcd_i2c_init(&handlerLCD);
+			delay_ms(10);
+			lcd_i2c_gotoxy(&handlerLCD, 1, 0);
+			lcd_i2c_putc(&handlerLCD, "Esperando residuo...");
+			delay_ms(500);
+
+			flagTerminado = 0;
+		}
+
+		if(flagLCD_Metal == 1){
+			delay_ms(20);
+			lcd_i2c_init(&handlerLCD);
+			lcd_i2c_gotoxy(&handlerLCD, 1, 2);
+			lcd_i2c_putc(&handlerLCD, "Metal detectado");
+			delay_ms(500);
+			flagLCD_Metal = 0;
+
+		}
+		if(flagLCD_NoMetal == 1){
+			delay_ms(20);
+			lcd_i2c_init(&handlerLCD);
+			lcd_i2c_gotoxy(&handlerLCD, 1, 1);
+			lcd_i2c_putc(&handlerLCD, "No Metal detectado");
+			delay_ms(500);
+			flagLCD_NoMetal = 0;
+		}
+		if(flagLCD_MetalHumedo == 1){
+			delay_ms(20);
+			lcd_i2c_init(&handlerLCD);
+			lcd_i2c_gotoxy(&handlerLCD, 1, 4);
+			lcd_i2c_putc(&handlerLCD, "Metal Humedo");
+			lcd_i2c_gotoxy(&handlerLCD, 2, 5);
+			lcd_i2c_putc(&handlerLCD, "detectado");
+			delay_ms(500);
+			flagLCD_MetalHumedo = 0;
+		}
+		if(flagLCD_Humedo == 1){
+			delay_ms(20);
+			lcd_i2c_init(&handlerLCD);
+			lcd_i2c_gotoxy(&handlerLCD, 1, 3);
+			lcd_i2c_putc(&handlerLCD, "Residuo Humedo");
+			lcd_i2c_gotoxy(&handlerLCD, 2, 5);
+			lcd_i2c_putc(&handlerLCD, "detectado");
+			delay_ms(500);
+			flagLCD_Humedo = 0;
+		}
 
 	}
 
@@ -149,52 +189,13 @@ void mensajeInicio_LCD(void){
 
 }
 
-void mensajeClasificacion(void){
-
-	if(flagLCD_Metal == 1){
-		delay_ms(20);
-		lcd_i2c_init(&handlerLCD);
-		lcd_i2c_gotoxy(&handlerLCD, 1, 2);
-		lcd_i2c_putc(&handlerLCD, "Metal detectado");
-		delay_ms(500);
-		flagLCD_Metal = 0;
-	}
-	else if(flagLCD_NoMetal == 1){
-		delay_ms(20);
-		lcd_i2c_init(&handlerLCD);
-		lcd_i2c_gotoxy(&handlerLCD, 1, 1);
-		lcd_i2c_putc(&handlerLCD, "No Metal detectado");
-		delay_ms(500);
-		flagLCD_NoMetal = 0;
-	}
-	else if(flagLCD_MetalHumedo == 1){
-		delay_ms(20);
-		lcd_i2c_init(&handlerLCD);
-		lcd_i2c_gotoxy(&handlerLCD, 1, 4);
-		lcd_i2c_putc(&handlerLCD, "Metal Humedo");
-		lcd_i2c_gotoxy(&handlerLCD, 2, 5);
-		lcd_i2c_putc(&handlerLCD, "detectado");
-		delay_ms(500);
-		flagLCD_MetalHumedo = 0;
-	}
-	else if(flagLCD_Humedo == 1){
-		delay_ms(20);
-		lcd_i2c_init(&handlerLCD);
-		lcd_i2c_gotoxy(&handlerLCD, 1, 3);
-		lcd_i2c_putc(&handlerLCD, "Residuo Humedo");
-		lcd_i2c_gotoxy(&handlerLCD, 2, 5);
-		lcd_i2c_putc(&handlerLCD, "detectado");
-		delay_ms(500);
-		flagLCD_Humedo = 0;
-	}
-
-}
-
 //Timer blinky led de estado
 void BasicTimer2_Callback(void) {
+
 	GPIOxTooglePin(&handlerBlinkyPin);
 	sensorInductivo = GPIO_ReadPin(&pinInductivo);
 	sensorHumedad = GPIO_ReadPin(&pinRain);
+	direccion = GPIO_ReadPin(&handlerDireccion);
 
 }
 
@@ -202,8 +203,8 @@ void BasicTimer2_Callback(void) {
 void BasicTimer3_Callback(void) {
 
 	if(flagPosicionInicial == 1){
+
 		GPIO_WritePin(&handlerDireccion, 0);
-		startPwmSignal(&signalPwmMotor);
 		if (contadorMotor <= pasos) {
 			contadorMotor++;
 		}else {
@@ -211,8 +212,8 @@ void BasicTimer3_Callback(void) {
 			contadorMotor = 0;
 			flagPosicionInicial = 2;
 			GPIO_WritePin(&handlerDireccion, 1);
-			delay_ms(500);
-
+			delay_ms(1000);
+			flagTerminado = 1;
 		}
 	}
 	else if(flagPosicionInicial == 0){
@@ -228,17 +229,14 @@ void BasicTimer3_Callback(void) {
 
 }
 
-void BasicTimer5_Callback (void){
-
-}
-
 //Interrupción sensor capacitivo
 void callback_extInt0(void) {
 
 
 	if(GPIO_ReadPin(&pinInductivo) == 0 && GPIO_ReadPin(&pinRain) == 0){
 
-//		flag3Sensores = 1;
+		flag3Sensores = 1;
+		flagLCD_MetalHumedo = 1;
 
 	}
 	else if(GPIO_ReadPin(&pinInductivo) == 0){
@@ -247,6 +245,7 @@ void callback_extInt0(void) {
 		pasos = PASOS_180_MOTOR;
 		startPwmSignal(&signalPwmMotor);
 		flagPosicionInicial = 0;
+		flagLCD_Metal = 1;
 
 	}
 	else if(GPIO_ReadPin(&pinRain) == 0){
@@ -255,6 +254,7 @@ void callback_extInt0(void) {
 		pasos = PASOS_90_MOTOR;
 		startPwmSignal(&signalPwmMotor);
 		flagPosicionInicial = 0;
+		flagLCD_Humedo = 1;
 
 	}
 	else{
@@ -263,6 +263,7 @@ void callback_extInt0(void) {
 		pasos = PASOS_270_MOTOR;
 		startPwmSignal(&signalPwmMotor);
 		flagPosicionInicial = 0;
+		flagLCD_NoMetal = 1;
 
 	}
 
