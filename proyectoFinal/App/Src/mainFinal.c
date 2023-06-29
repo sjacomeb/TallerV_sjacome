@@ -1,9 +1,10 @@
 /*
- * mainProyecto.c
+ * mainFinal.c
  *
- *  Created on: Jun 28, 2023
+ *  Created on: Jun 29, 2023
  *      Author: sjacome
  */
+
 #include <stdint.h>
 #include <stdio.h>
 #include <stdbool.h>
@@ -24,15 +25,10 @@
 
 #include "arm_math.h"
 
-//#define PASOS_360_MOTOR		200
-//#define PASOS_270_MOTOR		150
-//#define PASOS_180_MOTOR		100
-//#define PASOS_90_MOTOR		50
-
-#define PASOS_360_MOTOR		300
-#define PASOS_270_MOTOR		270
-#define PASOS_180_MOTOR		150
-#define PASOS_90_MOTOR		75
+#define PASOS_360_MOTOR		1600
+#define PASOS_270_MOTOR		1200
+#define PASOS_180_MOTOR		800
+#define PASOS_90_MOTOR		400
 
 #define LCD_ADDRESS			0x26
 
@@ -46,15 +42,9 @@ GPIO_Handler_t pinTrigger = {0};
 GPIO_Handler_t pinEcho = {0};
 BasicTimer_Handler_t handlerBlinkyTimer = {0};
 BasicTimer_Handler_t motorTimer = {0};
+BasicTimer_Handler_t cincoTimer = {0};
 EXTI_Config_t extiCapacitivo = {0};
 EXTI_Config_t extiUltrasonido = {0};
-
-//Elementos para hacer la comunicación serial
-GPIO_Handler_t handlerPinTX = {0};
-GPIO_Handler_t handlerPinRX = {0};
-USART_Handler_t usart2Comm = {0};
-uint8_t rxData = 0;
-char bufferReception[64] = {0};
 
 /* Elementos para el PWM*/
 GPIO_Handler_t handlerPwmMotor = {0};
@@ -68,7 +58,7 @@ GPIO_Handler_t handlerI2cSCL2 = {0};
 I2C_Handler_t handlerLCD = {0};
 
 /* Variables y arreglos*/
-uint8_t contadorMotor = 0;
+uint16_t contadorMotor = 0;
 uint8_t flagServo = 0;
 uint8_t flagPosicionInicial = 2;
 uint8_t flagLCD_Metal = 0;
@@ -78,7 +68,7 @@ uint8_t flagLCD_MetalHumedo = 0;
 uint8_t flag3Sensores = 0;
 uint8_t flagTerminado = 0;
 uint8_t flagInterrupcion = 0;
-uint16_t pasos = 0;
+uint32_t pasos = 0;
 uint8_t sensorInductivo = 0;
 uint8_t sensorCapacitivo = 0;
 uint8_t sensorHumedad = 0;
@@ -97,44 +87,45 @@ int main(void) {
 	while (1) {
 
 		//Lectura de sensores
-//		if(flagInterrupcion == 1){
-//
-//			delay_ms(2000);
-//
-//			if(GPIO_ReadPin(&pinInductivo) == 0 && GPIO_ReadPin(&pinRain) == 0){
-//
-//				flag3Sensores = 1;
-//				flagLCD_MetalHumedo = 1;
-//
-//			}
-//			else if(GPIO_ReadPin(&pinInductivo) == 0){
-//
-//				enableOutput(&signalPwmMotor);
-//				pasos = PASOS_180_MOTOR;
-//				startPwmSignal(&signalPwmMotor);
-//				flagPosicionInicial = 0;
-//				flagLCD_Metal = 1;
-//
-//			}
-//			else if(GPIO_ReadPin(&pinRain) == 0){
-//
-//				enableOutput(&signalPwmMotor);
-//				pasos = PASOS_90_MOTOR;
-//				startPwmSignal(&signalPwmMotor);
-//				flagPosicionInicial = 0;
-//				flagLCD_Humedo = 1;
-//
-//			}
-//			else{
-//
-//				enableOutput(&signalPwmMotor);
-//				pasos = PASOS_270_MOTOR;
-//				startPwmSignal(&signalPwmMotor);
-//				flagPosicionInicial = 0;
-//				flagLCD_NoMetal = 1;
-//			}
-//			flagInterrupcion = 0;
-//		}
+		if(flagInterrupcion == 1){
+
+			delay_ms(2000);
+
+			if(GPIO_ReadPin(&pinInductivo) == 0 && GPIO_ReadPin(&pinRain) == 0){
+
+				flag3Sensores = 1;
+				flagLCD_MetalHumedo = 1;
+
+			}
+			else if(GPIO_ReadPin(&pinInductivo) == 0){
+
+				enableOutput(&signalPwmMotor);
+				pasos = PASOS_180_MOTOR;
+				startPwmSignal(&signalPwmMotor);
+				flagPosicionInicial = 0;
+				flagLCD_Metal = 1;
+
+			}
+			else if(GPIO_ReadPin(&pinRain) == 0){
+
+				enableOutput(&signalPwmMotor);
+				pasos = PASOS_90_MOTOR;
+				startPwmSignal(&signalPwmMotor);
+				flagPosicionInicial = 0;
+				flagLCD_Humedo = 1;
+
+			}
+			else{
+
+				enableOutput(&signalPwmMotor);
+				pasos = PASOS_270_MOTOR;
+				startPwmSignal(&signalPwmMotor);
+				delay_ms(20);
+				flagPosicionInicial = 0;
+				flagLCD_NoMetal = 1;
+			}
+			flagInterrupcion = 0;
+		}
 
 		//Funcionamiento servo
 		if(flagServo == 1){
@@ -153,69 +144,69 @@ int main(void) {
 
 		}
 
-//		//Para los tres sensores
-//		if(flag3Sensores == 1){
-//			delay_ms(1000);
-//			enableOutput(&signalPwmServo);
-//			startPwmSignal(&signalPwmServo);
-//			updateDuttyCycle(&signalPwmServo, 2400);
-//			delay_ms(2000);
-//			updateDuttyCycle(&signalPwmServo, 600);
-//			delay_ms(1000);
-//
-//			flag3Sensores= 0;
-//			flagTerminado = 1;
-//		}
+		//Para los tres sensores
+		if(flag3Sensores == 1){
+			delay_ms(1000);
+			enableOutput(&signalPwmServo);
+			startPwmSignal(&signalPwmServo);
+			updateDuttyCycle(&signalPwmServo, 2400);
+			delay_ms(2000);
+			updateDuttyCycle(&signalPwmServo, 600);
+			delay_ms(1000);
 
-//		//Mensajes
-//		if(flagTerminado == 1){
-//			delay_ms(1000);
-//			lcd_i2c_init(&handlerLCD);
-//			delay_ms(10);
-//			lcd_i2c_gotoxy(&handlerLCD, 1, 0);
-//			lcd_i2c_putc(&handlerLCD, "Esperando residuo...");
-//			delay_ms(500);
-//
-//			flagTerminado = 0;
-//		}
-//
-//		if(flagLCD_Metal == 1){
-//			delay_ms(20);
-//			lcd_i2c_init(&handlerLCD);
-//			lcd_i2c_gotoxy(&handlerLCD, 1, 2);
-//			lcd_i2c_putc(&handlerLCD, "Metal detectado");
-//			delay_ms(500);
-//			flagLCD_Metal = 0;
-//
-//		}
-//		if(flagLCD_NoMetal == 1){
-//			delay_ms(20);
-//			lcd_i2c_init(&handlerLCD);
-//			lcd_i2c_gotoxy(&handlerLCD, 1, 1);
-//			lcd_i2c_putc(&handlerLCD, "No Metal detectado");
-//			delay_ms(500);
-//			flagLCD_NoMetal = 0;
-//		}
-//		if(flagLCD_MetalHumedo == 1){
-//			delay_ms(20);
-//			lcd_i2c_init(&handlerLCD);
-//			lcd_i2c_gotoxy(&handlerLCD, 1, 4);
-//			lcd_i2c_putc(&handlerLCD, "Metal Humedo");
-//			lcd_i2c_gotoxy(&handlerLCD, 2, 5);
-//			lcd_i2c_putc(&handlerLCD, "detectado");
-//			delay_ms(500);
-//			flagLCD_MetalHumedo = 0;
-//		}
-//		if(flagLCD_Humedo == 1){
-//			delay_ms(20);
-//			lcd_i2c_init(&handlerLCD);
-//			lcd_i2c_gotoxy(&handlerLCD, 1, 3);
-//			lcd_i2c_putc(&handlerLCD, "Residuo Humedo");
-//			lcd_i2c_gotoxy(&handlerLCD, 2, 5);
-//			lcd_i2c_putc(&handlerLCD, "detectado");
-//			delay_ms(500);
-//			flagLCD_Humedo = 0;
-//		}
+			flag3Sensores= 0;
+			flagTerminado = 1;
+		}
+
+		//Mensajes
+		if(flagTerminado == 1){
+			delay_ms(1000);
+			lcd_i2c_init(&handlerLCD);
+			delay_ms(10);
+			lcd_i2c_gotoxy(&handlerLCD, 1, 0);
+			lcd_i2c_putc(&handlerLCD, "Esperando residuo...");
+			delay_ms(500);
+
+			flagTerminado = 0;
+		}
+
+		if(flagLCD_Metal == 1){
+			delay_ms(20);
+			lcd_i2c_init(&handlerLCD);
+			lcd_i2c_gotoxy(&handlerLCD, 1, 2);
+			lcd_i2c_putc(&handlerLCD, "Metal detectado");
+			delay_ms(500);
+			flagLCD_Metal = 0;
+
+		}
+		if(flagLCD_NoMetal == 1){
+			delay_ms(20);
+			lcd_i2c_init(&handlerLCD);
+			lcd_i2c_gotoxy(&handlerLCD, 1, 1);
+			lcd_i2c_putc(&handlerLCD, "No Metal detectado");
+			delay_ms(500);
+			flagLCD_NoMetal = 0;
+		}
+		if(flagLCD_MetalHumedo == 1){
+			delay_ms(20);
+			lcd_i2c_init(&handlerLCD);
+			lcd_i2c_gotoxy(&handlerLCD, 1, 4);
+			lcd_i2c_putc(&handlerLCD, "Metal Humedo");
+			lcd_i2c_gotoxy(&handlerLCD, 2, 5);
+			lcd_i2c_putc(&handlerLCD, "detectado");
+			delay_ms(500);
+			flagLCD_MetalHumedo = 0;
+		}
+		if(flagLCD_Humedo == 1){
+			delay_ms(20);
+			lcd_i2c_init(&handlerLCD);
+			lcd_i2c_gotoxy(&handlerLCD, 1, 3);
+			lcd_i2c_putc(&handlerLCD, "Residuo Humedo");
+			lcd_i2c_gotoxy(&handlerLCD, 2, 5);
+			lcd_i2c_putc(&handlerLCD, "detectado");
+			delay_ms(500);
+			flagLCD_Humedo = 0;
+		}
 
 	}
 
@@ -246,11 +237,11 @@ void BasicTimer2_Callback(void) {
 }
 
 //Timer para el motor
-void BasicTimer5_Callback(void) {
+void BasicTimer3_Callback(void) {
 
 	if(flagPosicionInicial == 1){
 
-		GPIO_WritePin(&handlerDireccion, 0);
+		GPIO_WritePin(&handlerDireccion,1);
 		startPwmSignal(&signalPwmMotor);
 
 		if (contadorMotor <= pasos) {
@@ -259,8 +250,8 @@ void BasicTimer5_Callback(void) {
 			stopPwmSignal(&signalPwmMotor);
 			contadorMotor = 0;
 			flagPosicionInicial = 2;
-			GPIO_WritePin(&handlerDireccion, 1);
-//			flagTerminado = 1;
+			GPIO_WritePin(&handlerDireccion,0);
+			flagTerminado = 1;
 		}
 	}
 	else if(flagPosicionInicial == 0){
@@ -280,42 +271,8 @@ void BasicTimer5_Callback(void) {
 //Interrupción sensor capacitivo
 void callback_extInt0(void) {
 
-//	flagInterrupcion = 1;
+	flagInterrupcion = 1;
 
-	if(GPIO_ReadPin(&pinInductivo) == 0 && GPIO_ReadPin(&pinRain) == 0){
-
-		flag3Sensores = 1;
-		flagLCD_MetalHumedo = 1;
-
-	}
-	else if(GPIO_ReadPin(&pinInductivo) == 0){
-
-		enableOutput(&signalPwmMotor);
-		pasos = PASOS_180_MOTOR;
-		startPwmSignal(&signalPwmMotor);
-		flagPosicionInicial = 0;
-		flagLCD_Metal = 1;
-
-	}
-	else if(GPIO_ReadPin(&pinRain) == 0){
-
-		enableOutput(&signalPwmMotor);
-		pasos = PASOS_90_MOTOR;
-		startPwmSignal(&signalPwmMotor);
-		flagPosicionInicial = 0;
-		flagLCD_Humedo = 1;
-
-	}
-	else{
-
-		pasos = PASOS_270_MOTOR;
-//		startPwmSignal(&signalPwmMotor);
-		enableOutput(&signalPwmMotor);
-//		pasos = PASOS_270_MOTOR;
-		startPwmSignal(&signalPwmMotor);
-		flagPosicionInicial = 0;
-//		flagLCD_NoMetal = 1;
-	}
 }
 
 void initSystem(void) {
@@ -338,14 +295,6 @@ void initSystem(void) {
 	handlerBlinkyTimer.TIMx_Config.TIMx_period = 250;
 	handlerBlinkyTimer.TIMx_Config.TIMx_interruptEnable =BTIMER_INTERRUP_ENABLE;
 	BasicTimer_Config(&handlerBlinkyTimer);
-
-	/* Configuración del TIM5  */
-	motorTimer.ptrTIMx = TIM5;
-	motorTimer.TIMx_Config.TIMx_mode = BTIMER_MODE_UP;
-	motorTimer.TIMx_Config.TIMx_speed = BTIMER_SPEED_1ms;
-	motorTimer.TIMx_Config.TIMx_period = 10 ;
-	motorTimer.TIMx_Config.TIMx_interruptEnable =BTIMER_INTERRUP_ENABLE;
-	BasicTimer_Config(&motorTimer);
 
 	/* Configuración del sensor inductivo */
 	pinInductivo.pGPIOx = GPIOC;
@@ -373,8 +322,8 @@ void initSystem(void) {
 	GPIO_Config(&pinRain);
 
 	/* Configuramos el PWM Motor*/
-	handlerPwmMotor.pGPIOx = GPIOA;
-	handlerPwmMotor.GPIO_PinConfig.GPIO_PinNumber = PIN_1;
+	handlerPwmMotor.pGPIOx = GPIOC;
+	handlerPwmMotor.GPIO_PinConfig.GPIO_PinNumber = PIN_7;
 	handlerPwmMotor.GPIO_PinConfig.GPIO_PinMode = GPIO_MODE_ALTFN;
 	handlerPwmMotor.GPIO_PinConfig.GPIO_PinOType = GPIO_OTYPE_PUSHPULL;
 	handlerPwmMotor.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
@@ -383,18 +332,18 @@ void initSystem(void) {
 	GPIO_Config(&handlerPwmMotor);
 
 	/* Configurando el Timer para que genere la señal PWM Motor */
-	signalPwmMotor.ptrTIMx = TIM5;
+	signalPwmMotor.ptrTIMx = TIM3;
 	signalPwmMotor.config.channel = PWM_CHANNEL_2;
 	signalPwmMotor.config.duttyCicle = 5000;
 	signalPwmMotor.config.periodo = 10000;
 	signalPwmMotor.config.prescaler = 16;
 	pwm_Config(&signalPwmMotor);
 
-//	/* Configuración del TIM3 para controlar PWM motor */
-//	motorTimer.ptrTIMx = TIM3;
-//	motorTimer.TIMx_Config.TIMx_mode = BTIMER_MODE_UP;
-//	motorTimer.TIMx_Config.TIMx_interruptEnable = BTIMER_INTERRUP_ENABLE;
-//	BasicTimer_Config(&motorTimer);
+	/* Configuración del TIM3 para controlar PWM motor */
+	motorTimer.ptrTIMx = TIM3;
+	motorTimer.TIMx_Config.TIMx_mode = BTIMER_MODE_UP;
+	motorTimer.TIMx_Config.TIMx_interruptEnable = BTIMER_INTERRUP_ENABLE;
+	BasicTimer_Config(&motorTimer);
 
 	/* Configuramos el PWM Servo */
 	handlerPwmServo.pGPIOx = GPIOB;
@@ -415,13 +364,14 @@ void initSystem(void) {
 	pwm_Config(&signalPwmServo);
 
 	/* Configuración del pin dirección del motor */
-	handlerDireccion.pGPIOx = GPIOC;
-	handlerDireccion.GPIO_PinConfig.GPIO_PinNumber = PIN_9;
+	handlerDireccion.pGPIOx = GPIOB;
+	handlerDireccion.GPIO_PinConfig.GPIO_PinNumber = PIN_6;
 	handlerDireccion.GPIO_PinConfig.GPIO_PinMode = GPIO_MODE_OUT;
 	handlerDireccion.GPIO_PinConfig.GPIO_PinOType = GPIO_OTYPE_PUSHPULL;
 	handlerDireccion.GPIO_PinConfig.GPIO_PinSpeed = GPIO_OSPEED_FAST;
 	handlerDireccion.GPIO_PinConfig.GPIO_PinPuPdControl = GPIO_PUPDR_NOTHING;
 	GPIO_Config(&handlerDireccion);
+	GPIO_WritePin(&handlerDireccion, 0);
 
 	/* Configurando los pines sobre los que funciona el I2C2*/
 	handlerI2cSCL2.pGPIOx                            = GPIOB;
@@ -448,6 +398,7 @@ void initSystem(void) {
 	i2c_config(&handlerLCD);
 
 }
+
 
 
 
